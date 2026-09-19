@@ -65,6 +65,17 @@ If you ran `php artisan db:seed`, the following accounts are available (password
 | Seller (verified) | `seller.cebu@prime.test` | `password` |
 | Buyer | `buyer.miguel@prime.test` | `password` |
 
+## Extra demo data (Davao Region)
+
+To browse the marketplace with a larger, more realistic catalog, seed ~100 listings and ~50 rental units spread across every category/rental type and real Davao Region provinces and cities:
+
+```bash
+php artisan db:seed --class="Database\Seeders\DavaoListingSeeder"
+php artisan db:seed --class="Database\Seeders\DavaoRentalSeeder"
+```
+
+Both are safe to re-run (they update existing rows instead of duplicating them) and are intentionally **not** part of `php artisan db:seed`'s default `DatabaseSeeder` chain, since `DemoSeederTest` asserts exact row counts against that chain.
+
 ## Testing & code quality
 
 ```bash
