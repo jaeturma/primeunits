@@ -1,7 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
-    Bus,
-    Car,
     Filter,
     MapPin,
     Search,
@@ -11,7 +9,10 @@ import {
     UserX,
     X,
 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type RentalCard = {
     id: number;
@@ -28,7 +29,7 @@ type RentalCard = {
     price_per_hour: string | null;
     province: string | null;
     municipality: string | null;
-    image_url: string | null;
+    image_url: string;
 };
 
 type Filters = {
@@ -53,20 +54,6 @@ type Props = {
         provinces: string[];
         municipalities: Array<{ name: string; province_name: string | null }>;
     };
-};
-
-const typeIcons: Record<string, typeof Car> = {
-    car_rental: Car,
-    van_rental: Car,
-    self_drive: Car,
-    chauffeur: Car,
-    airport_transfer: Car,
-    wedding_car: Car,
-    shuttle: Bus,
-    bus_rental: Bus,
-    truck_rental: Truck,
-    equipment_rental: Truck,
-    motorcycle_rental: Car,
 };
 
 const driverModes = [
@@ -130,6 +117,7 @@ export default function RentalsIndex({
     return (
         <>
             <Head title="Rental Marketplace" />
+            <PublicHeader />
             <div className="mx-auto w-full max-w-7xl p-4 lg:p-6">
                 {/* Header */}
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -370,30 +358,23 @@ export default function RentalsIndex({
                     </main>
                 </div>
             </div>
+            <PublicFooter />
         </>
     );
 }
 
 function RentalCard({ rental }: { rental: RentalCard }) {
-    const Icon = typeIcons[rental.rental_type] ?? Truck;
-
     return (
         <Link
             href={`/rentals/${rental.provider_username}/${rental.slug}`}
             className="group overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md"
         >
             <div className="relative aspect-video overflow-hidden bg-muted">
-                {rental.image_url ? (
-                    <img
-                        src={rental.image_url}
-                        alt={rental.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground/30">
-                        <Icon className="size-12" />
-                    </div>
-                )}
+                <img
+                    src={rental.image_url}
+                    alt={rental.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
                 {/* Driver badge top-right */}
                 <span
                     className={`absolute top-2 right-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${

@@ -1,16 +1,16 @@
-import { FormEvent, useState } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
-    Bus,
     CalendarDays,
-    Car,
     CheckCircle,
     MapPin,
-    Truck,
     User,
     UserX,
     Users,
 } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type RentalPackage = {
     id: number;
@@ -54,18 +54,10 @@ const durationLabel: Record<string, string> = {
     monthly: 'month',
 };
 
-const typeIcons: Record<string, typeof Car> = {
-    bus_rental: Bus,
-    shuttle: Bus,
-    truck_rental: Truck,
-    equipment_rental: Truck,
-};
-
 export default function RentalShow({ rental }: { rental: RentalUnit }) {
     const [activeImage, setActiveImage] = useState(0);
     const { auth, flash } = usePage().props as any;
     const primary = rental.images[activeImage] ?? rental.images[0];
-    const Icon = typeIcons[rental.rental_type] ?? Car;
 
     const { data, setData, post, processing, errors } = useForm({
         rental_unit_id: rental.id.toString(),
@@ -88,22 +80,17 @@ export default function RentalShow({ rental }: { rental: RentalUnit }) {
     return (
         <>
             <Head title={rental.name} />
+            <PublicHeader />
             <div className="mx-auto w-full max-w-6xl gap-6 p-4 lg:grid lg:grid-cols-[1fr_360px] lg:p-6">
                 {/* Left: Images + details */}
                 <div className="space-y-4">
                     {/* Main image */}
                     <div className="aspect-video overflow-hidden rounded-lg border bg-muted">
-                        {primary ? (
-                            <img
-                                src={primary.url}
-                                alt={rental.name}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-full items-center justify-center text-muted-foreground/30">
-                                <Icon className="size-16" />
-                            </div>
-                        )}
+                        <img
+                            src={primary.url}
+                            alt={rental.name}
+                            className="h-full w-full object-cover"
+                        />
                     </div>
 
                     {/* Thumbnails */}
@@ -470,6 +457,7 @@ export default function RentalShow({ rental }: { rental: RentalUnit }) {
                     </div>
                 </aside>
             </div>
+            <PublicFooter />
         </>
     );
 }

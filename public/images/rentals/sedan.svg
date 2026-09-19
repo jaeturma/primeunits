@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Sedan car illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="230" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M120 262 L146 262 L178 196 Q188 176 212 176 L392 176 Q414 176 424 196 L456 250 L520 262 Q536 262 536 278 L536 288 L104 288 L104 278 Q104 262 120 262 Z" fill="#047857"/>
+  <path d="M204 200 L226 200 L214 250 L184 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M240 200 L364 200 L372 250 L232 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M380 200 L400 200 L426 250 L392 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <rect x="104" y="278" width="432" height="14" rx="4" fill="#065F46"/>
+  <circle cx="210" cy="292" r="38" fill="#18181B"/>
+  <circle cx="210" cy="292" r="16" fill="#FAFAFA"/>
+  <circle cx="440" cy="292" r="38" fill="#18181B"/>
+  <circle cx="440" cy="292" r="16" fill="#FAFAFA"/>
+  <rect x="132" y="230" width="16" height="8" rx="3" fill="#FDE68A"/>
+  <rect x="500" y="230" width="16" height="8" rx="3" fill="#FCA5A5"/>
+</svg>

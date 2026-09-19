@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Wedding car illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="230" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M120 262 L146 262 L178 196 Q188 176 212 176 L392 176 Q414 176 424 196 L456 250 L520 262 Q536 262 536 278 L536 288 L104 288 L104 278 Q104 262 120 262 Z" fill="#FAFAFA" stroke="#065F46" stroke-width="4"/>
+  <path d="M204 200 L226 200 L214 250 L184 250 Z" fill="#ECFDF5"/>
+  <path d="M240 200 L364 200 L372 250 L232 250 Z" fill="#ECFDF5"/>
+  <path d="M380 200 L400 200 L426 250 L392 250 Z" fill="#ECFDF5"/>
+  <rect x="104" y="278" width="432" height="14" rx="4" fill="#D4D4D8"/>
+  <circle cx="210" cy="292" r="38" fill="#18181B"/>
+  <circle cx="210" cy="292" r="16" fill="#FAFAFA"/>
+  <circle cx="440" cy="292" r="38" fill="#18181B"/>
+  <circle cx="440" cy="292" r="16" fill="#FAFAFA"/>
+  <path d="M260 176 Q260 150 300 150 Q296 176 320 178 Q296 180 300 206 Q260 206 260 180 Z" fill="#047857"/>
+  <circle cx="300" cy="178" r="10" fill="#FDE68A"/>
+  <path d="M104 240 Q320 260 536 240" fill="none" stroke="#FDE68A" stroke-width="4" stroke-dasharray="10 8"/>
+</svg>
