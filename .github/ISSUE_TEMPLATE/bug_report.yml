@@ -1,0 +1,58 @@
+name: Bug report
+description: Report something that's broken in PrimeUnits
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Search/filter by '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Relevant context
+      description: >
+        Category/listing involved, error messages or stack traces, browser
+        console output, and anything else that might help track it down.
+    validations:
+      required: false
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: e.g. PHP 8.3, Chrome 129, local dev / production
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checks
+      options:
+        - label: This isn't a security vulnerability (if it is, see [SECURITY.md](../../SECURITY.md) instead of filing a public issue)
+          required: true
+        - label: I searched existing issues and didn't find a duplicate
+          required: true
