@@ -581,7 +581,7 @@ function ActiveFilterChips({
 function ListingCard({ listing }: { listing: ListingCard }) {
     return (
         <Link
-            href={`/listings/${listing.slug ?? listing.id}`}
+            href={`/listings/${listing.id}`}
             className="group overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md"
         >
             <div className="aspect-video overflow-hidden bg-muted">
