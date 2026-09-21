@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type Seller = {
     id: number;
@@ -22,7 +24,7 @@ type Listing = {
     model: string | null;
     is_featured: boolean;
     category: { name: string } | null;
-    image_url: string | null;
+    image_url: string;
 };
 
 type PaginatedListings = {
@@ -45,6 +47,7 @@ export default function SellerShow({
     return (
         <>
             <Head title={displayName} />
+            <PublicHeader />
             <div className="mx-auto w-full max-w-6xl p-4">
                 <div className="mb-8 rounded-lg border p-6">
                     <div className="flex items-start gap-4">
@@ -122,17 +125,11 @@ export default function SellerShow({
                                     className="group rounded-lg border bg-card transition-shadow hover:shadow-md"
                                 >
                                     <div className="relative aspect-video overflow-hidden rounded-t-lg bg-muted">
-                                        {listing.image_url ? (
-                                            <img
-                                                src={listing.image_url}
-                                                alt={listing.title}
-                                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                                                No image
-                                            </div>
-                                        )}
+                                        <img
+                                            src={listing.image_url}
+                                            alt={listing.title}
+                                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                        />
                                         {listing.is_featured && (
                                             <span className="absolute top-2 left-2 rounded bg-yellow-400 px-2 py-0.5 text-[11px] font-semibold text-yellow-900">
                                                 Featured
@@ -194,6 +191,7 @@ export default function SellerShow({
                     </>
                 )}
             </div>
+            <PublicFooter />
         </>
     );
 }

@@ -5,15 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSellerProfileRequest;
 use App\Models\Listing;
 use App\Models\SellerProfile;
+use App\Support\ResolvesListingStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SellerProfileController extends Controller
 {
+    use ResolvesListingStockImage;
     use StoresResourceAttachments;
 
     public function apply(Request $request): Response|RedirectResponse
@@ -87,7 +88,13 @@ class SellerProfileController extends Controller
         $sellerProfile->load('user:id,name');
 
         $listings = Listing::query()
-            ->with(['category:id,name,slug', 'images'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->where('seller_profile_id', $sellerProfile->id)
             ->where('status', Listing::StatusApproved)
             ->notExpired()
@@ -105,8 +112,7 @@ class SellerProfileController extends Controller
                 'brand' => $listing->brand,
                 'model' => $listing->model,
                 'category' => $listing->category,
-                'image_url' => ($img = $listing->images->firstWhere('is_primary', true) ?? $listing->images->first())
-                    ? Storage::disk('public')->url($img->path) : null,
+                'image_url' => $this->listingImageUrl($listing->images->firstWhere('is_primary', true) ?? $listing->images->first(), $listing),
                 'is_featured' => (bool) ($listing->has_active_boost ?? false),
             ]);
 

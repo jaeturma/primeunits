@@ -2,7 +2,6 @@ import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -19,16 +18,20 @@ createInertiaApp({
                 return null;
             case name.startsWith('financing/'):
                 return null;
-            case name === 'listings/show':
+            case name.startsWith('listings/'):
+                return null;
+            case name.startsWith('rentals/'):
+                return null;
+            case name.startsWith('dealers/'):
+                return null;
+            case name === 'sellers/show':
+                return null;
+            case name === 'seo/landing':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
-            case name.startsWith('rentals/'):
-                return AppHeaderLayout;
-            case name.startsWith('listings/'):
-                return AppHeaderLayout;
             default:
                 return AppLayout;
         }

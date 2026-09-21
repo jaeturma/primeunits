@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 type RentalUnit = {
     id: number;
@@ -14,7 +15,7 @@ type RentalUnit = {
     region: string | null;
     municipality: string | null;
     views_count: number;
-    image_url: string | null;
+    image_url: string;
     provider: { name: string; email: string } | null;
     created_at: string | null;
     action_label: string | null;
@@ -213,15 +214,11 @@ export default function AdminRentals({
                                         <td className="p-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-14 shrink-0 overflow-hidden rounded bg-muted">
-                                                    {unit.image_url ? (
-                                                        <img
-                                                            src={unit.image_url}
-                                                            alt=""
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="h-full w-full" />
-                                                    )}
+                                                    <img
+                                                        src={unit.image_url}
+                                                        alt=""
+                                                        className="h-full w-full object-cover"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">

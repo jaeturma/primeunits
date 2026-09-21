@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Adm;
 use App\Http\Controllers\Controller;
 use App\Models\RentalUnit;
 use App\Services\ApprovalWorkflowService;
+use App\Support\ResolvesRentalStockImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,8 @@ use Inertia\Response;
 
 class RentalController extends Controller
 {
+    use ResolvesRentalStockImage;
+
     public function index(Request $request): Response
     {
         $units = RentalUnit::query()
@@ -44,7 +47,7 @@ class RentalController extends Controller
                 'views_count' => $unit->views_count,
                 'image_url' => ($img = $unit->images->firstWhere('is_primary', true) ?? $unit->images->first())
                     ? Storage::disk('public')->url($img->path)
-                    : null,
+                    : $this->stockImageUrl($unit),
                 'provider' => $unit->user ? ['name' => $unit->user->name, 'email' => $unit->user->email] : null,
                 'created_at' => $unit->created_at?->toISOString(),
                 'action_label' => app(ApprovalWorkflowService::class)->actionLabel($unit, $request->user()),

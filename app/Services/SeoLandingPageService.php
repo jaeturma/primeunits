@@ -4,14 +4,16 @@ namespace App\Services;
 
 use App\Models\Listing;
 use App\Models\SeoPage;
+use App\Support\ResolvesListingStockImage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SeoLandingPageService
 {
+    use ResolvesListingStockImage;
+
     public function pageForCategory(string $categorySlug): ?SeoPage
     {
         return SeoPage::query()
@@ -58,7 +60,14 @@ class SeoLandingPageService
     public function listings(SeoPage $page, Request $request): LengthAwarePaginator
     {
         return Listing::query()
-            ->with(['category:id,name,slug', 'images', 'boosts'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'boosts',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->where('status', Listing::StatusApproved)
             ->when($page->category_id, fn (Builder $query): Builder => $query->where('category_id', $page->category_id))
             ->when($page->region, fn (Builder $query): Builder => $query->where('region', $page->region))
@@ -118,7 +127,7 @@ class SeoLandingPageService
             'municipality' => $listing->municipality,
             'is_featured' => (bool) ($listing->has_active_boost ?? $listing->boosts->contains(fn ($boost): bool => $boost->isCurrentlyActive())),
             'category' => $listing->category,
-            'image_url' => $primaryImage ? Storage::disk('public')->url($primaryImage->path) : null,
+            'image_url' => $this->listingImageUrl($primaryImage, $listing),
             'created_at' => $listing->created_at?->toISOString(),
         ];
     }

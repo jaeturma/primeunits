@@ -9,7 +9,7 @@ type Listing = {
     brand: string | null;
     model: string | null;
     category: { name: string } | null;
-    image_url: string | null;
+    image_url: string;
 };
 
 export default function Favorites({ favorites }: { favorites: Listing[] }) {
@@ -48,17 +48,11 @@ export default function Favorites({ favorites }: { favorites: Listing[] }) {
                                 className="group rounded-lg border bg-card transition-shadow hover:shadow-md"
                             >
                                 <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                                    {listing.image_url ? (
-                                        <img
-                                            src={listing.image_url}
-                                            alt={listing.title}
-                                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                                            No image
-                                        </div>
-                                    )}
+                                    <img
+                                        src={listing.image_url}
+                                        alt={listing.title}
+                                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                    />
                                 </div>
                                 <div className="p-4">
                                     <p className="text-xs text-muted-foreground">

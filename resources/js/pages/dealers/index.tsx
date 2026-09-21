@@ -1,5 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type Dealer = {
     id: number;
@@ -38,6 +41,7 @@ export default function DealersIndex({
     return (
         <>
             <Head title="Dealers" />
+            <PublicHeader />
             <div className="mx-auto w-full max-w-6xl p-4">
                 <div className="mb-6">
                     <h1 className="text-2xl font-semibold tracking-normal">
@@ -152,6 +156,7 @@ export default function DealersIndex({
                     </>
                 )}
             </div>
+            <PublicFooter />
         </>
     );
 }

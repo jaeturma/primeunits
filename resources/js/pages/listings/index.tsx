@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type Category = {
     id: number;
@@ -199,6 +201,7 @@ export default function PublicListings({
     return (
         <>
             <Head title="Listings" />
+            <PublicHeader />
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 p-4 lg:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
@@ -437,6 +440,7 @@ export default function PublicListings({
                     </main>
                 </div>
             </div>
+            <PublicFooter />
         </>
     );
 }

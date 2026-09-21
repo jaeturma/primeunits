@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type Dealer = {
     id: number;
@@ -27,7 +29,7 @@ type Listing = {
     year_model: number | null;
     is_featured: boolean;
     category: { name: string } | null;
-    image_url: string | null;
+    image_url: string;
 };
 
 type PaginatedListings = {
@@ -47,6 +49,7 @@ export default function DealerShow({
     return (
         <>
             <Head title={dealer.business_name} />
+            <PublicHeader />
             <div className="mx-auto w-full max-w-6xl p-4">
                 {dealer.banner && (
                     <div className="mb-6 h-48 w-full overflow-hidden rounded-xl bg-muted">
@@ -166,17 +169,11 @@ export default function DealerShow({
                                     className="group rounded-lg border bg-card transition-shadow hover:shadow-md"
                                 >
                                     <div className="relative aspect-video overflow-hidden rounded-t-lg bg-muted">
-                                        {listing.image_url ? (
-                                            <img
-                                                src={listing.image_url}
-                                                alt={listing.title}
-                                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                                                No image
-                                            </div>
-                                        )}
+                                        <img
+                                            src={listing.image_url}
+                                            alt={listing.title}
+                                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                        />
                                         {listing.is_featured && (
                                             <span className="absolute top-2 left-2 rounded bg-yellow-400 px-2 py-0.5 text-[11px] font-semibold text-yellow-900">
                                                 Featured
@@ -243,6 +240,7 @@ export default function DealerShow({
                     </>
                 )}
             </div>
+            <PublicFooter />
         </>
     );
 }

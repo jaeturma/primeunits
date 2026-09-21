@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DealerProfile;
 use App\Models\Listing;
+use App\Support\ResolvesListingStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Inertia\Response;
 
 class DealerProfileController extends Controller
 {
+    use ResolvesListingStockImage;
     use StoresResourceAttachments;
 
     public function index(Request $request): Response
@@ -56,7 +58,13 @@ class DealerProfileController extends Controller
         $dealerProfile->load('user:id,name');
 
         $listings = Listing::query()
-            ->with(['category:id,name,slug', 'images'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->where('user_id', $dealerProfile->user_id)
             ->where('listing_type', Listing::TypeDealer)
             ->where('status', Listing::StatusApproved)
@@ -77,8 +85,7 @@ class DealerProfileController extends Controller
                 'year_model' => $l->year_model,
                 'is_featured' => (bool) ($l->has_active_boost ?? false),
                 'category' => $l->category,
-                'image_url' => ($img = $l->images->firstWhere('is_primary', true) ?? $l->images->first())
-                    ? Storage::disk('public')->url($img->path) : null,
+                'image_url' => $this->listingImageUrl($l->images->firstWhere('is_primary', true) ?? $l->images->first(), $l),
             ]);
 
         return Inertia::render('dealers/show', [

@@ -1,6 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,7 +24,7 @@ type ListingCard = {
     region: string | null;
     province: string | null;
     municipality: string | null;
-    image_url: string | null;
+    image_url: string;
     is_featured: boolean;
     category: { name: string };
 };
@@ -54,9 +57,7 @@ export default function SeoLanding({
     listings,
 }: Props) {
     const [form, setForm] = useState(filters);
-    const heroImage = listings.data.find(
-        (listing) => listing.image_url,
-    )?.image_url;
+    const heroImage = listings.data[0]?.image_url;
 
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -84,6 +85,7 @@ export default function SeoLanding({
                     content={seoPage.meta_description}
                 />
             </Head>
+            <PublicHeader />
 
             <main className="bg-background">
                 <section className="relative min-h-[390px] overflow-hidden bg-zinc-950 text-white">
@@ -197,13 +199,11 @@ export default function SeoLanding({
                                 className="overflow-hidden rounded-lg border bg-background hover:bg-accent/40"
                             >
                                 <div className="aspect-video bg-muted">
-                                    {listing.image_url && (
-                                        <img
-                                            src={listing.image_url}
-                                            alt=""
-                                            className="h-full w-full object-cover"
-                                        />
-                                    )}
+                                    <img
+                                        src={listing.image_url}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
                                 </div>
                                 <div className="space-y-2 p-4">
                                     <p className="text-xs text-muted-foreground">
@@ -235,6 +235,7 @@ export default function SeoLanding({
                     )}
                 </section>
             </main>
+            <PublicFooter />
         </>
     );
 }

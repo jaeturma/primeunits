@@ -1,4 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { PublicFooter } from '@/components/public-footer';
+import { PublicHeader } from '@/components/public-header';
 
 type Product = {
     id: number;
@@ -40,11 +42,10 @@ const typeColors: Record<string, string> = {
 };
 
 export default function FinancingShow({ partner }: { partner: Partner }) {
-    const { auth } = usePage().props;
-
     return (
         <>
             <Head title={partner.company_name} />
+            <PublicHeader />
 
             {partner.banner_url && (
                 <div className="h-48 w-full overflow-hidden bg-muted">
@@ -209,6 +210,7 @@ export default function FinancingShow({ partner }: { partner: Partner }) {
                     </aside>
                 </div>
             </div>
+            <PublicFooter />
         </>
     );
 }

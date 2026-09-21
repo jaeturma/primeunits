@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Services\ApprovalWorkflowService;
 use App\Services\NotificationService;
+use App\Support\ResolvesListingStockImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class ListingController extends Controller
 {
+    use ResolvesListingStockImage;
+
     public function index(Request $request): Response
     {
         $filters = $request->validate([
@@ -28,7 +31,15 @@ class ListingController extends Controller
         ]);
 
         $listings = Listing::query()
-            ->with(['category:id,name,slug', 'user:id,name,email', 'images', 'attachments'])
+            ->with([
+                'category:id,name,slug',
+                'user:id,name,email',
+                'images',
+                'attachments',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->when($filters['status'] ?? null, fn ($query, string $status) => $query->where('status', $status))
             ->latest()
             ->get()
@@ -56,11 +67,11 @@ class ListingController extends Controller
 
         if ($listing->isApproved()) {
             $notifications->send(
-            user: $listing->user,
-            event: 'listing.approved',
-            title: 'Listing approved',
-            message: "{$listing->title} is now live.",
-            url: "/listings/{$listing->id}",
+                user: $listing->user,
+                event: 'listing.approved',
+                title: 'Listing approved',
+                message: "{$listing->title} is now live.",
+                url: "/listings/{$listing->id}",
             );
         }
 
@@ -113,7 +124,7 @@ class ListingController extends Controller
                 'name' => $listing->user->name,
                 'email' => $listing->user->email,
             ],
-            'image_url' => $primaryImage ? Storage::disk('public')->url($primaryImage->path) : null,
+            'image_url' => $this->listingImageUrl($primaryImage, $listing),
             'documents' => collect([
                 $listing->valid_id_file ? ['label' => 'Valid ID', 'url' => Storage::disk('public')->url($listing->valid_id_file)] : null,
                 $listing->or_cr_file ? ['label' => 'OR/CR', 'url' => Storage::disk('public')->url($listing->or_cr_file)] : null,

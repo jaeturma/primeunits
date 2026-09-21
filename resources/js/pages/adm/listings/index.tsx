@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 
 type Listing = {
@@ -11,7 +12,7 @@ type Listing = {
     model: string | null;
     status_label: string;
     rejected_reason: string | null;
-    image_url: string | null;
+    image_url: string;
     can_approve: boolean;
     action_label: string | null;
     can_reject: boolean;
@@ -101,13 +102,11 @@ export default function AdminListings({
                         >
                             <div className="flex flex-wrap gap-4">
                                 <div className="h-28 w-40 overflow-hidden rounded-md bg-muted">
-                                    {listing.image_url && (
-                                        <img
-                                            src={listing.image_url}
-                                            alt=""
-                                            className="h-full w-full object-cover"
-                                        />
-                                    )}
+                                    <img
+                                        src={listing.image_url}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">

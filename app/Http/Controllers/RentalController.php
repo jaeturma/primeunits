@@ -7,6 +7,7 @@ use App\Models\Province;
 use App\Models\RentalBooking;
 use App\Models\RentalUnit;
 use App\Models\User;
+use App\Support\ResolvesRentalStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ use Inertia\Response;
 
 class RentalController extends Controller
 {
+    use ResolvesRentalStockImage;
     use StoresResourceAttachments;
 
     public function index(Request $request): Response
@@ -338,26 +340,5 @@ class RentalController extends Controller
             'views_count' => $unit->views_count,
             'image_url' => $primaryImage ? Storage::disk('public')->url($primaryImage->path) : $this->stockImageUrl($unit),
         ];
-    }
-
-    /**
-     * A type-appropriate stock illustration for rental units without an
-     * uploaded photo yet, instead of showing the same generic image (or a
-     * bare icon) for every unit regardless of what it actually is.
-     */
-    private function stockImageUrl(RentalUnit $unit): string
-    {
-        $image = match (true) {
-            $unit->rental_type === RentalUnit::TypeEquipmentRental => 'equipment',
-            $unit->rental_type === RentalUnit::TypeTruckRental => 'truck',
-            $unit->rental_type === RentalUnit::TypeBusRental => 'bus',
-            $unit->rental_type === RentalUnit::TypeWeddingCar => 'wedding-car',
-            $unit->rental_type === RentalUnit::TypeMotorcycleRental => 'motorcycle',
-            $unit->rental_type === RentalUnit::TypeSelfDrive && ($unit->capacity ?? 0) <= 2 => 'motorcycle',
-            in_array($unit->rental_type, [RentalUnit::TypeVanRental, RentalUnit::TypeShuttle, RentalUnit::TypeAirportTransfer], true) => 'van',
-            default => 'sedan',
-        };
-
-        return "/images/vehicles/{$image}.svg";
     }
 }
