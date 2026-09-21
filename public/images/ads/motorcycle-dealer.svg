@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Motorcycle dealership illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="240" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <rect x="130" y="140" width="380" height="160" fill="#ECFDF5"/>
+  <path d="M110 140 L320 70 L530 140 Z" fill="#065F46"/>
+  <rect x="150" y="180" width="110" height="120" fill="#047857"/>
+  <rect x="380" y="180" width="110" height="120" fill="#047857"/>
+  <rect x="166" y="196" width="78" height="60" rx="4" fill="#F4F4F5" opacity="0.85"/>
+  <rect x="396" y="196" width="78" height="60" rx="4" fill="#F4F4F5" opacity="0.85"/>
+  <rect x="286" y="210" width="68" height="90" rx="4" fill="#18181B"/>
+  <path d="M118 140 L128 132 L512 132 L522 140 Z" fill="#18181B"/>
+  <path d="M150 132 L166 100 L182 132 Z" fill="#FDE68A"/>
+  <path d="M198 132 L214 100 L230 132 Z" fill="#FCA5A5"/>
+  <path d="M246 132 L262 100 L278 132 Z" fill="#FDE68A"/>
+  <circle cx="235" cy="292" r="26" fill="none" stroke="#18181B" stroke-width="9"/>
+  <circle cx="235" cy="292" r="7" fill="#18181B"/>
+  <circle cx="335" cy="292" r="26" fill="none" stroke="#18181B" stroke-width="9"/>
+  <circle cx="335" cy="292" r="7" fill="#18181B"/>
+  <path d="M235 292 L280 264 L312 264 L335 292" fill="none" stroke="#047857" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="264" y="248" width="46" height="12" rx="6" fill="#065F46"/>
+</svg>

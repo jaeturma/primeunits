@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Aftermarket performance upgrades illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="230" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <rect x="176" y="176" width="220" height="14" rx="6" fill="#065F46"/>
+  <rect x="196" y="160" width="16" height="20" rx="3" fill="#18181B"/>
+  <rect x="360" y="160" width="16" height="20" rx="3" fill="#18181B"/>
+  <path d="M150 258 L172 258 L196 202 Q204 186 222 186 L360 186 Q380 186 388 204 L408 250 L150 250 Z" fill="#047857"/>
+  <path d="M228 202 L354 202 L364 246 L218 246 Z" fill="#ECFDF5" opacity="0.9"/>
+  <rect x="150" y="250" width="258" height="12" rx="4" fill="#065F46"/>
+  <path d="M408 234 L452 208 L466 214 L432 250 Z" fill="#18181B"/>
+  <circle cx="212" cy="266" r="30" fill="#18181B"/>
+  <circle cx="212" cy="266" r="12" fill="#FDE68A"/>
+  <circle cx="366" cy="266" r="30" fill="#18181B"/>
+  <circle cx="366" cy="266" r="12" fill="#FDE68A"/>
+  <g transform="translate(490,150)">
+    <path d="M0 60 L0 10 M-16 26 L0 8 L16 26" fill="none" stroke="#047857" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

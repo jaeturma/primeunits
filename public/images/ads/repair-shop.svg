@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Vehicle repair shop illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <path d="M120 300 L120 140 Q120 120 140 120 L500 120 Q520 120 520 140 L520 300 Z" fill="#ECFDF5"/>
+  <path d="M100 140 L320 60 L540 140 Z" fill="#065F46"/>
+  <rect x="150" y="170" width="340" height="130" rx="8" fill="#18181B"/>
+  <rect x="168" y="188" width="304" height="94" rx="4" fill="#3F3F46"/>
+  <ellipse cx="320" cy="298" rx="230" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M232 258 L242 258 L256 226 Q262 216 274 216 L366 216 Q378 216 384 228 L396 250 L426 258 Q434 258 434 268 L434 274 L222 274 L222 268 Q222 258 232 258 Z" fill="#047857"/>
+  <rect x="222" y="268" width="212" height="10" rx="3" fill="#065F46"/>
+  <circle cx="264" cy="278" r="18" fill="#18181B"/>
+  <circle cx="264" cy="278" r="7" fill="#FAFAFA"/>
+  <circle cx="392" cy="278" r="18" fill="#18181B"/>
+  <circle cx="392" cy="278" r="7" fill="#FAFAFA"/>
+  <g transform="translate(452,150) rotate(35)">
+    <rect x="-14" y="-70" width="28" height="120" rx="10" fill="#047857"/>
+    <path d="M-26 -70 a26 26 0 0 1 52 0 l0 14 a26 26 0 0 1 -52 0 Z" fill="none" stroke="#047857" stroke-width="14"/>
+    <path d="M-26 50 a26 26 0 0 0 52 0 l0 -14 a26 26 0 0 0 -52 0 Z" fill="none" stroke="#047857" stroke-width="14"/>
+  </g>
+  <circle cx="486" cy="112" r="9" fill="#FDE68A"/>
+</svg>

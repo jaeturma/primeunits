@@ -19,7 +19,7 @@ test('home landing page exposes marketplace search data and listing sections', f
         ->assertJsonPath('props.landing.search_title', 'Find your unit')
         ->assertJsonPath('props.searchOptions.fuelTypes', ['Gasoline', 'Diesel', 'LPG', 'BEV', 'HEV', 'PHEV', 'eREV', 'FCEV'])
         ->assertJsonPath('props.searchOptions.brands.0.name', 'ADO')
-        ->assertJsonPath('props.ads.0.image_url', '/images/landing-equipment-yard.png')
+        ->assertJsonPath('props.ads.0.image_url', '/images/ads/repair-shop.svg')
         ->assertJsonCount(7, 'props.ads')
         ->assertJsonStructure([
             'props' => [
