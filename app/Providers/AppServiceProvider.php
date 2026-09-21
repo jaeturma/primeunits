@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\DealerProfile;
+use App\Models\DronePilotCredential;
 use App\Models\FinancingApplication;
 use App\Models\Lead;
 use App\Models\Listing;
@@ -10,6 +11,7 @@ use App\Models\RentalUnit;
 use App\Models\SellerProfile;
 use App\Models\Transaction;
 use App\Policies\DealerProfilePolicy;
+use App\Policies\DronePilotCredentialPolicy;
 use App\Policies\FinancingApplicationPolicy;
 use App\Policies\LeadPolicy;
 use App\Policies\ListingPolicy;
@@ -51,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DealerProfile::class, DealerProfilePolicy::class);
         Gate::policy(RentalUnit::class, RentalUnitPolicy::class);
         Gate::policy(FinancingApplication::class, FinancingApplicationPolicy::class);
+        Gate::policy(DronePilotCredential::class, DronePilotCredentialPolicy::class);
     }
 
     /**

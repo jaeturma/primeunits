@@ -406,6 +406,7 @@ class ListingController extends Controller
             ['value' => Listing::ConditionBrandNew, 'label' => 'Brand New'],
             ['value' => Listing::ConditionUsed, 'label' => 'Used'],
             ['value' => Listing::ConditionSurplus, 'label' => 'Surplus'],
+            ['value' => Listing::ConditionReconditioned, 'label' => 'Reconditioned'],
         ];
     }
 

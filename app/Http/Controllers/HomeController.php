@@ -306,6 +306,7 @@ class HomeController extends Controller
                 ['value' => Listing::ConditionBrandNew, 'label' => 'Brand new'],
                 ['value' => Listing::ConditionSurplus, 'label' => 'Good as new / surplus'],
                 ['value' => Listing::ConditionUsed, 'label' => 'Used but good condition'],
+                ['value' => Listing::ConditionReconditioned, 'label' => 'Reconditioned'],
             ],
             'fuelTypes' => $this->searchableFieldOptions('cars', 'fuel_type'),
             'regions' => $this->locationNames(Region::class, ['Luzon', 'Visayas', 'Mindanao'], 'region'),

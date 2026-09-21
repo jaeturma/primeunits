@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id',
+    'category_id',
     'rental_type',
     'name',
     'slug',
@@ -22,6 +23,21 @@ use Illuminate\Support\Str;
     'with_driver',
     'price_per_day',
     'price_per_hour',
+    'price_per_hectare',
+    'operator_fee',
+    'transportation_fee',
+    'security_deposit',
+    'fuel_included',
+    'operator_included',
+    'transportation_included',
+    'minimum_area_hectares',
+    'minimum_rental_duration',
+    'service_coverage_area',
+    'requires_verified_drone_operator',
+    'allows_self_operation',
+    'intended_uses',
+    'drone_pilot_user_id',
+    'compliance_status',
     'region',
     'province',
     'municipality',
@@ -66,12 +82,44 @@ class RentalUnit extends Model
 
     public const TypeMotorcycleRental = 'motorcycle_rental';
 
+    public const TypeHarvesterRental = 'harvester_rental';
+
+    public const TypeHarvesterService = 'harvester_service';
+
+    public const TypeDroneRental = 'drone_rental';
+
+    public const TypeDroneService = 'drone_service';
+
+    public const ComplianceNotApplicable = 'not_applicable';
+
+    public const ComplianceVerifiedOperatorAssigned = 'verified_operator_assigned';
+
+    public const ComplianceSelfOperationAllowed = 'self_operation_allowed';
+
+    public const ComplianceUnresolved = 'unresolved';
+
     /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function dronePilot(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'drone_pilot_user_id');
     }
 
     /**
@@ -133,7 +181,21 @@ class RentalUnit extends Model
             self::TypeTruckRental => 'Truck Rental',
             self::TypeEquipmentRental => 'Equipment Rental',
             self::TypeMotorcycleRental => 'Motorcycle Rental',
+            self::TypeHarvesterRental => 'Harvester Rental',
+            self::TypeHarvesterService => 'Harvester Service',
+            self::TypeDroneRental => 'Drone Rental',
+            self::TypeDroneService => 'Drone Service',
         ];
+    }
+
+    public function isDroneRelated(): bool
+    {
+        return in_array($this->rental_type, [self::TypeDroneRental, self::TypeDroneService], true);
+    }
+
+    public function isHarvesterRelated(): bool
+    {
+        return in_array($this->rental_type, [self::TypeHarvesterRental, self::TypeHarvesterService], true);
     }
 
     protected static function boot(): void
@@ -164,6 +226,16 @@ class RentalUnit extends Model
             'with_driver' => 'boolean',
             'price_per_day' => 'decimal:2',
             'price_per_hour' => 'decimal:2',
+            'price_per_hectare' => 'decimal:2',
+            'operator_fee' => 'decimal:2',
+            'transportation_fee' => 'decimal:2',
+            'security_deposit' => 'decimal:2',
+            'fuel_included' => 'boolean',
+            'operator_included' => 'boolean',
+            'transportation_included' => 'boolean',
+            'minimum_area_hectares' => 'decimal:2',
+            'requires_verified_drone_operator' => 'boolean',
+            'allows_self_operation' => 'boolean',
             'views_count' => 'integer',
             'agent_validated_at' => 'datetime',
             'manager_accepted_at' => 'datetime',

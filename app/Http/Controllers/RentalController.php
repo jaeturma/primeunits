@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\DroneComplianceAcknowledgement;
+use App\Models\DroneComplianceNotice;
+use App\Models\DronePilotCredential;
 use App\Models\Municipality;
 use App\Models\Province;
 use App\Models\RentalBooking;
+use App\Models\RentalPackage;
 use App\Models\RentalUnit;
 use App\Models\User;
+use App\Services\DroneBookingComplianceService;
+use App\Services\RentalPricingService;
 use App\Support\ResolvesRentalStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +29,11 @@ class RentalController extends Controller
 {
     use ResolvesRentalStockImage;
     use StoresResourceAttachments;
+
+    public function __construct(
+        private readonly RentalPricingService $pricingService,
+        private readonly DroneBookingComplianceService $droneComplianceService,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -110,7 +122,7 @@ class RentalController extends Controller
     {
         abort_unless($rentalUnit->isApproved() && $rentalUnit->user_id === $provider->id, 404);
 
-        $rentalUnit->load(['attachments', 'images', 'packages', 'user:id,name']);
+        $rentalUnit->load(['attachments', 'images', 'packages', 'user:id,name', 'dronePilot:id,name']);
         $rentalUnit->increment('views_count');
 
         $availability = $rentalUnit->availability()
@@ -142,6 +154,23 @@ class RentalController extends Controller
                     ])
                     : [['id' => 0, 'url' => $this->stockImageUrl($rentalUnit), 'is_primary' => true]],
                 'attachments' => $this->serializeAttachments($rentalUnit),
+                'operator_fee' => $rentalUnit->operator_fee,
+                'transportation_fee' => $rentalUnit->transportation_fee,
+                'security_deposit' => $rentalUnit->security_deposit,
+                'fuel_included' => $rentalUnit->fuel_included,
+                'minimum_area_hectares' => $rentalUnit->minimum_area_hectares,
+                'minimum_rental_duration' => $rentalUnit->minimum_rental_duration,
+                'service_coverage_area' => $rentalUnit->service_coverage_area,
+                'requires_verified_drone_operator' => $rentalUnit->requires_verified_drone_operator,
+                'allows_self_operation' => $rentalUnit->allows_self_operation,
+                'intended_uses' => $rentalUnit->intended_uses,
+                'drone_pilot' => $rentalUnit->dronePilot ? [
+                    'name' => $rentalUnit->dronePilot->name,
+                    'is_verified' => $rentalUnit->dronePilot->hasVerifiedDroneCredential(),
+                ] : null,
+                'compliance_notice' => $rentalUnit->isDroneRelated() && ($notice = DroneComplianceNotice::active())
+                    ? ['version' => $notice->version, 'body' => $notice->body]
+                    : null,
             ],
         ]);
     }
@@ -183,11 +212,26 @@ class RentalController extends Controller
     {
         return Inertia::render('rental-provider/units/create', [
             'rental_types' => RentalUnit::rentalTypes(),
+            'farm_categories' => Category::query()
+                ->where('slug', 'agricultural-equipment')
+                ->get(['id', 'name']),
+            'verified_drone_pilots' => User::query()
+                ->whereHas('droneCredentials', fn ($q) => $q->where('status', DronePilotCredential::StatusVerified))
+                ->get(['id', 'name'])
+                ->filter(fn (User $u): bool => $u->hasVerifiedDroneCredential())
+                ->values(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $isFarmType = in_array($request->string('rental_type')->toString(), [
+            RentalUnit::TypeHarvesterRental,
+            RentalUnit::TypeHarvesterService,
+            RentalUnit::TypeDroneRental,
+            RentalUnit::TypeDroneService,
+        ], true);
+
         $request->validate([
             'rental_type' => ['required', 'string'],
             'name' => ['required', 'string', 'max:255'],
@@ -209,20 +253,45 @@ class RentalController extends Controller
             'attachments.*' => self::AttachmentFileRules,
             'valid_id_file' => [Rule::requiredIf(fn (): bool => ! $request->user()->rentalProfile?->isApproved()), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'or_cr_file' => [Rule::requiredIf(fn (): bool => ! $request->user()->rentalProfile?->isApproved()), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'category_id' => [Rule::requiredIf($isFarmType), 'nullable', 'integer', 'exists:categories,id'],
+            'price_per_hectare' => ['nullable', 'numeric', 'min:0'],
+            'operator_fee' => ['nullable', 'numeric', 'min:0'],
+            'transportation_fee' => ['nullable', 'numeric', 'min:0'],
+            'security_deposit' => ['nullable', 'numeric', 'min:0'],
+            'fuel_included' => ['nullable', 'boolean'],
+            'operator_included' => ['boolean'],
+            'transportation_included' => ['boolean'],
+            'minimum_area_hectares' => ['nullable', 'numeric', 'min:0'],
+            'minimum_rental_duration' => ['nullable', 'string', 'max:255'],
+            'service_coverage_area' => ['nullable', 'string', 'max:2000'],
+            'requires_verified_drone_operator' => ['boolean'],
+            'allows_self_operation' => ['boolean'],
+            'intended_uses' => ['nullable', 'string', 'max:2000'],
+            'drone_pilot_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        DB::transaction(function () use ($request): void {
+        DB::transaction(function () use ($request, $isFarmType): void {
             $unit = RentalUnit::query()->create([
                 ...$request->only([
                     'rental_type', 'name', 'description', 'brand', 'model',
                     'year_model', 'capacity', 'with_driver', 'price_per_day', 'price_per_hour',
                     'region', 'province', 'municipality', 'barangay',
+                    'price_per_hectare', 'operator_fee', 'transportation_fee', 'security_deposit',
+                    'fuel_included', 'operator_included', 'transportation_included',
+                    'minimum_area_hectares', 'minimum_rental_duration', 'service_coverage_area',
+                    'requires_verified_drone_operator', 'allows_self_operation', 'intended_uses',
                 ]),
+                'category_id' => $isFarmType ? $request->integer('category_id') : null,
+                'drone_pilot_user_id' => $request->integer('drone_pilot_user_id') ?: null,
                 'user_id' => $request->user()->id,
                 'status' => RentalUnit::StatusPending,
                 'valid_id_file' => $request->hasFile('valid_id_file') ? $request->file('valid_id_file')->store('rentals/identity', 'public') : null,
                 'or_cr_file' => $request->hasFile('or_cr_file') ? $request->file('or_cr_file')->store('rentals/identity', 'public') : null,
             ]);
+
+            if ($unit->isDroneRelated()) {
+                $unit->update(['compliance_status' => $this->resolveComplianceStatus($unit)]);
+            }
 
             foreach ($request->file('images', []) as $index => $image) {
                 $unit->images()->create([
@@ -268,28 +337,122 @@ class RentalController extends Controller
     {
         abort_unless($rentalUnit->isApproved(), 404);
 
+        $isDrone = $rentalUnit->isDroneRelated();
+
         $request->validate([
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'rental_package_id' => ['nullable', 'integer', 'exists:rental_packages,id'],
             'pickup_address' => ['nullable', 'string', 'max:500'],
             'message' => ['nullable', 'string', 'max:2000'],
+            'pricing_unit' => ['nullable', 'string', Rule::in([
+                RentalPackage::DurationHourly,
+                RentalPackage::DurationDaily,
+                RentalPackage::DurationPerHectare,
+                RentalPackage::DurationFixedProject,
+            ])],
+            'area_hectares' => ['nullable', 'numeric', 'min:0'],
+            'with_operator' => ['boolean'],
+            'with_transportation' => ['boolean'],
+            'self_operate' => ['boolean'],
+            'compliance_acknowledged' => [Rule::requiredIf($isDrone), 'boolean'],
+        ]);
+
+        if ($isDrone && ! $request->boolean('compliance_acknowledged')) {
+            return back()->withErrors(['compliance_acknowledged' => 'You must acknowledge the drone compliance notice before booking.']);
+        }
+
+        $requestedStart = $request->string('start_date')->toString();
+        $requestedEnd = $request->filled('end_date') ? $request->string('end_date')->toString() : $requestedStart;
+
+        $hasOverlap = RentalBooking::query()
+            ->where('rental_unit_id', $rentalUnit->id)
+            ->whereIn('status', [RentalBooking::StatusConfirmed, RentalBooking::StatusActive])
+            ->where('start_date', '<=', $requestedEnd)
+            ->where(fn ($q) => $q->whereNull('end_date')->orWhere('end_date', '>=', $requestedStart))
+            ->exists();
+
+        if ($hasOverlap) {
+            return back()->withErrors(['start_date' => 'This unit is already booked for the selected dates.']);
+        }
+
+        $pricingUnit = $request->string('pricing_unit')->toString() ?: RentalPackage::DurationDaily;
+
+        if ($pricingUnit === RentalPackage::DurationPerHectare) {
+            $minimum = (float) ($rentalUnit->minimum_area_hectares ?? 0);
+            $area = (float) $request->input('area_hectares', 0);
+
+            if ($area <= 0 || ($minimum > 0 && $area < $minimum)) {
+                return back()->withErrors(['area_hectares' => "A minimum of {$minimum} hectares is required for this service."]);
+            }
+        }
+
+        $rentalPackage = $request->filled('rental_package_id')
+            ? RentalPackage::query()->find($request->integer('rental_package_id'))
+            : null;
+
+        $selfOperate = $request->boolean('self_operate');
+        $operatorDecision = ['allowed' => true, 'reason' => null, 'drone_pilot_user_id' => null, 'snapshot' => null];
+
+        if ($isDrone) {
+            $operatorDecision = $this->droneComplianceService->resolveOperator($rentalUnit, $request->user(), $selfOperate);
+
+            if (! $operatorDecision['allowed']) {
+                return back()->withErrors(['self_operate' => $operatorDecision['reason']]);
+            }
+        }
+
+        $pricing = $this->pricingService->calculate($rentalUnit, [
+            'pricing_unit' => $pricingUnit,
+            'area_hectares' => $request->input('area_hectares'),
+            'start_date' => $request->string('start_date')->toString(),
+            'end_date' => $request->filled('end_date') ? $request->string('end_date')->toString() : null,
+            'with_operator' => $isDrone ? ! $selfOperate : $request->boolean('with_operator'),
+            'with_transportation' => $request->boolean('with_transportation'),
+            'rental_package' => $rentalPackage,
         ]);
 
         $code = 'RB-'.strtoupper(Str::random(8));
 
-        RentalBooking::query()->create([
+        $booking = RentalBooking::query()->create([
             'rental_unit_id' => $rentalUnit->id,
             'renter_id' => $request->user()->id,
             'provider_id' => $rentalUnit->user_id,
-            'rental_package_id' => $request->input('rental_package_id'),
+            'rental_package_id' => $rentalPackage?->id,
             'reference_code' => $code,
             'start_date' => $request->string('start_date')->toString(),
-            'end_date' => $request->string('end_date')->toString(),
+            'end_date' => $request->filled('end_date') ? $request->string('end_date')->toString() : null,
             'pickup_address' => $request->string('pickup_address')->toString(),
             'message' => $request->string('message')->toString(),
             'status' => RentalBooking::StatusInquiry,
+            'area_hectares' => $request->input('area_hectares'),
+            'pricing_unit' => $pricingUnit,
+            'quoted_price' => $pricing['total_amount'],
+            'drone_pilot_user_id' => $operatorDecision['drone_pilot_user_id'],
+            'operator_verification_snapshot' => $operatorDecision['snapshot'],
+            ...$pricing,
         ]);
+
+        if ($isDrone) {
+            $notice = DroneComplianceNotice::active();
+            $noticeVersion = $notice?->version ?? 'unversioned';
+            $noticeText = $notice?->body ?? DroneComplianceNotice::DEFAULT_NOTICE_TEXT;
+
+            DroneComplianceAcknowledgement::query()->create([
+                'user_id' => $request->user()->id,
+                'rental_booking_id' => $booking->id,
+                'drone_compliance_notice_id' => $notice?->id,
+                'notice_version' => $noticeVersion,
+                'notice_text' => $noticeText,
+                'acknowledged_at' => now(),
+                'ip_address' => $request->ip(),
+            ]);
+
+            $booking->update([
+                'compliance_acknowledged_at' => now(),
+                'compliance_notice_version' => $noticeVersion,
+            ]);
+        }
 
         return back()->with('booking_code', $code);
     }
@@ -313,6 +476,25 @@ class RentalController extends Controller
         return back()->with('success', 'Booking status updated.');
     }
 
+    private function resolveComplianceStatus(RentalUnit $unit): string
+    {
+        if (! $unit->isDroneRelated()) {
+            return RentalUnit::ComplianceNotApplicable;
+        }
+
+        $pilot = $unit->dronePilot;
+
+        if ($pilot?->hasVerifiedDroneCredential()) {
+            return RentalUnit::ComplianceVerifiedOperatorAssigned;
+        }
+
+        if ($unit->allows_self_operation && ! $unit->requires_verified_drone_operator) {
+            return RentalUnit::ComplianceSelfOperationAllowed;
+        }
+
+        return RentalUnit::ComplianceUnresolved;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -333,12 +515,20 @@ class RentalController extends Controller
             'with_driver' => $unit->with_driver,
             'price_per_day' => $unit->price_per_day,
             'price_per_hour' => $unit->price_per_hour,
+            'price_per_hectare' => $unit->price_per_hectare,
+            'operator_included' => $unit->operator_included,
+            'transportation_included' => $unit->transportation_included,
             'status' => $unit->status,
             'region' => $unit->region,
             'province' => $unit->province,
             'municipality' => $unit->municipality,
             'views_count' => $unit->views_count,
             'image_url' => $primaryImage ? Storage::disk('public')->url($primaryImage->path) : $this->stockImageUrl($unit),
+            'is_drone_related' => $unit->isDroneRelated(),
+            'compliance_status' => $unit->isDroneRelated() ? $unit->compliance_status : null,
+            'has_verified_operator' => $unit->isDroneRelated()
+                ? $unit->compliance_status === RentalUnit::ComplianceVerifiedOperatorAssigned
+                : null,
         ];
     }
 }

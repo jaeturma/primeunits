@@ -35,6 +35,7 @@ type RentalUnit = {
     with_driver: boolean;
     price_per_day: string;
     price_per_hour: string | null;
+    price_per_hectare: string | null;
     capacity: number | null;
     description: string | null;
     region: string | null;
@@ -45,6 +46,19 @@ type RentalUnit = {
     availability: Record<string, boolean>;
     images: RentalImage[];
     attachments: Array<{ id: number; name: string; url: string; size: number }>;
+    is_drone_related: boolean;
+    operator_included: boolean;
+    transportation_included: boolean;
+    operator_fee: string | null;
+    transportation_fee: string | null;
+    security_deposit: string | null;
+    minimum_area_hectares: string | null;
+    requires_verified_drone_operator: boolean;
+    allows_self_operation: boolean;
+    intended_uses: string | null;
+    service_coverage_area: string | null;
+    drone_pilot: { name: string; is_verified: boolean } | null;
+    compliance_notice: { version: string; body: string } | null;
 };
 
 const durationLabel: Record<string, string> = {
@@ -66,12 +80,23 @@ export default function RentalShow({ rental }: { rental: RentalUnit }) {
         end_date: '',
         pickup_address: '',
         message: '',
+        pricing_unit: rental.price_per_hectare ? 'per_hectare' : 'daily',
+        area_hectares: '',
+        with_operator: false,
+        with_transportation: false,
+        self_operate: false,
+        compliance_acknowledged: false,
     });
 
     function submitBooking(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        post(`/rentals/${rental.slug}/book`, { preserveScroll: true });
+        post(`/rentals/${rental.id}/book`, { preserveScroll: true });
     }
+
+    const requiresOperatorChoice =
+        !rental.operator_included && rental.operator_fee != null;
+    const requiresTransportChoice =
+        !rental.transportation_included && rental.transportation_fee != null;
 
     const location = [rental.municipality, rental.province, rental.region]
         .filter(Boolean)
@@ -417,6 +442,194 @@ export default function RentalShow({ rental }: { rental: RentalUnit }) {
                                         className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-emerald-600"
                                     />
                                 </div>
+
+                                {rental.price_per_hectare && (
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium">
+                                            Pricing
+                                        </label>
+                                        <select
+                                            value={data.pricing_unit}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'pricing_unit',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="h-9 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-1 focus:ring-emerald-600"
+                                        >
+                                            <option value="daily">
+                                                Daily rate
+                                            </option>
+                                            <option value="per_hectare">
+                                                Per-hectare service
+                                            </option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {data.pricing_unit === 'per_hectare' && (
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium">
+                                            Area (hectares){' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min={
+                                                rental.minimum_area_hectares ??
+                                                '0'
+                                            }
+                                            step="0.01"
+                                            value={data.area_hectares}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'area_hectares',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="h-9 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-1 focus:ring-emerald-600"
+                                        />
+                                        {rental.minimum_area_hectares && (
+                                            <p className="text-xs text-muted-foreground">
+                                                Minimum{' '}
+                                                {rental.minimum_area_hectares}{' '}
+                                                hectares
+                                            </p>
+                                        )}
+                                        {errors.area_hectares && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.area_hectares}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {requiresOperatorChoice &&
+                                    !rental.is_drone_related && (
+                                        <label className="flex items-center gap-2 text-xs">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.with_operator}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'with_operator',
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                            />
+                                            Add qualified operator (+PHP{' '}
+                                            {Number(
+                                                rental.operator_fee,
+                                            ).toLocaleString()}
+                                            )
+                                        </label>
+                                    )}
+                                {requiresTransportChoice && (
+                                    <label className="flex items-center gap-2 text-xs">
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                data.with_transportation
+                                            }
+                                            onChange={(e) =>
+                                                setData(
+                                                    'with_transportation',
+                                                    e.target.checked,
+                                                )
+                                            }
+                                        />
+                                        Add transportation (+PHP{' '}
+                                        {Number(
+                                            rental.transportation_fee,
+                                        ).toLocaleString()}
+                                        )
+                                    </label>
+                                )}
+
+                                {rental.is_drone_related && (
+                                    <div className="space-y-3 rounded-md border border-dashed p-3">
+                                        <div className="flex items-center gap-2 text-xs">
+                                            {rental.drone_pilot
+                                                ?.is_verified ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700">
+                                                    <CheckCircle className="size-3" />
+                                                    Verified Drone Operator
+                                                    Assigned
+                                                </span>
+                                            ) : (
+                                                <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">
+                                                    No verified operator
+                                                    assigned
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {rental.allows_self_operation && (
+                                            <label className="flex items-center gap-2 text-xs">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        data.self_operate
+                                                    }
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'self_operate',
+                                                            e.target.checked,
+                                                        )
+                                                    }
+                                                />
+                                                I will self-operate this
+                                                drone (requires my own
+                                                verified pilot credential when
+                                                required)
+                                            </label>
+                                        )}
+                                        {errors.self_operate && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.self_operate}
+                                            </p>
+                                        )}
+
+                                        {rental.compliance_notice && (
+                                            <div className="space-y-2 rounded-md bg-muted p-3">
+                                                <p className="text-xs leading-5 text-muted-foreground">
+                                                    {
+                                                        rental
+                                                            .compliance_notice
+                                                            .body
+                                                    }
+                                                </p>
+                                                <label className="flex items-start gap-2 text-xs font-medium">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            data.compliance_acknowledged
+                                                        }
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                'compliance_acknowledged',
+                                                                e.target
+                                                                    .checked,
+                                                            )
+                                                        }
+                                                    />
+                                                    I acknowledge and accept
+                                                    this compliance notice
+                                                </label>
+                                                {errors.compliance_acknowledged && (
+                                                    <p className="text-xs text-destructive">
+                                                        {
+                                                            errors.compliance_acknowledged
+                                                        }
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 <button
                                     type="submit"

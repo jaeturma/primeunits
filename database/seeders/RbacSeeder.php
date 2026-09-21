@@ -48,6 +48,11 @@ class RbacSeeder extends Seeder
             'manage_catalog' => 'Manage Categories and Brands',
             'manage_financing' => 'Manage Financing Partners',
             'approve_financing' => 'Approve Financing Applications',
+            'manage_farm_equipment' => 'Manage Farm Equipment Categories and Attributes',
+            'review_drone_credentials' => 'Review Drone Pilot Credentials',
+            'view_drone_credential_documents' => 'View Private Drone Credential Documents',
+            'manage_drone_compliance' => 'Manage Drone Compliance Notices and Requirements',
+            'suspend_drone_listings' => 'Suspend Noncompliant Drone Listings',
         ])->map(fn (string $label, string $name): Permission => Permission::query()->updateOrCreate(
             ['name' => $name],
             ['label' => $label],
@@ -72,6 +77,11 @@ class RbacSeeder extends Seeder
             $permissions->get('manage_catalog')?->id,
             $permissions->get('manage_financing')?->id,
             $permissions->get('approve_financing')?->id,
+            $permissions->get('manage_farm_equipment')?->id,
+            $permissions->get('review_drone_credentials')?->id,
+            $permissions->get('view_drone_credential_documents')?->id,
+            $permissions->get('manage_drone_compliance')?->id,
+            $permissions->get('suspend_drone_listings')?->id,
         ]);
         $roles->get('admin')?->permissions()->syncWithoutDetaching($adminPerms);
 
@@ -86,11 +96,17 @@ class RbacSeeder extends Seeder
             $permissions->get('manage_catalog')?->id,
             $permissions->get('manage_financing')?->id,
             $permissions->get('approve_financing')?->id,
+            $permissions->get('manage_farm_equipment')?->id,
+            $permissions->get('review_drone_credentials')?->id,
+            $permissions->get('view_drone_credential_documents')?->id,
+            $permissions->get('manage_drone_compliance')?->id,
+            $permissions->get('suspend_drone_listings')?->id,
         ]));
 
         $roles->get('coordinator')?->permissions()->syncWithoutDetaching(array_filter([
             $permissions->get('approve_listings')?->id,
             $permissions->get('manage_rentals')?->id,
+            $permissions->get('review_drone_credentials')?->id,
         ]));
 
         $roles->get('insurance_manager')?->permissions()->syncWithoutDetaching(array_filter([

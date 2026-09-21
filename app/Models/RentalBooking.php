@@ -22,6 +22,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'notes',
     'confirmed_at',
     'cancelled_at',
+    'area_hectares',
+    'pricing_unit',
+    'base_amount',
+    'operator_fee_amount',
+    'transportation_fee_amount',
+    'fuel_amount',
+    'deposit_amount',
+    'platform_fee_amount',
+    'discount_amount',
+    'tax_amount',
+    'total_amount',
+    'drone_pilot_user_id',
+    'operator_verification_snapshot',
+    'compliance_acknowledged_at',
+    'compliance_notice_version',
 ])]
 class RentalBooking extends Model
 {
@@ -67,6 +82,14 @@ class RentalBooking extends Model
         return $this->belongsTo(RentalPackage::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function dronePilot(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'drone_pilot_user_id');
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {
@@ -89,6 +112,18 @@ class RentalBooking extends Model
             'quoted_price' => 'decimal:2',
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'area_hectares' => 'decimal:2',
+            'base_amount' => 'decimal:2',
+            'operator_fee_amount' => 'decimal:2',
+            'transportation_fee_amount' => 'decimal:2',
+            'fuel_amount' => 'decimal:2',
+            'deposit_amount' => 'decimal:2',
+            'platform_fee_amount' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'operator_verification_snapshot' => 'array',
+            'compliance_acknowledged_at' => 'datetime',
         ];
     }
 }

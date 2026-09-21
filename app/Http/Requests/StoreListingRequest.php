@@ -42,6 +42,7 @@ class StoreListingRequest extends FormRequest
                 Listing::ConditionBrandNew,
                 Listing::ConditionUsed,
                 Listing::ConditionSurplus,
+                Listing::ConditionReconditioned,
             ])],
             'year_model' => ['nullable', 'integer', 'min:1900', 'max:'.((int) date('Y') + 1)],
             'brand' => ['nullable', 'string', 'max:255'],

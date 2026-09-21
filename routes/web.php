@@ -4,6 +4,7 @@ use App\Http\Controllers\Adm\AnalyticsController;
 use App\Http\Controllers\Adm\BrandController as AdminBrandController;
 use App\Http\Controllers\Adm\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Adm\DealerProfileController as AdminDealerProfileController;
+use App\Http\Controllers\Adm\DroneCredentialController as AdminDroneCredentialController;
 use App\Http\Controllers\Adm\FinancingApplicationController as AdminFinancingApplicationController;
 use App\Http\Controllers\Adm\FinancingPartnerController as AdminFinancingPartnerController;
 use App\Http\Controllers\Adm\LandingAdController as AdminLandingAdController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Adm\SellerProfileController as AdminSellerProfileContro
 use App\Http\Controllers\Adm\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Adm\UserController;
 use App\Http\Controllers\DealerProfileController;
+use App\Http\Controllers\DronePilotCredentialController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FinancingApplicationController;
 use App\Http\Controllers\FinancingController;
@@ -123,6 +125,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rental booking (any auth user)
     Route::post('rentals/{rentalUnit}/book', [RentalController::class, 'submitBooking'])->name('rentals.book');
+
+    // Drone pilot credential self-service (any auth user)
+    Route::prefix('drone-credentials')->name('drone-credentials.')->group(function (): void {
+        Route::get('/', [DronePilotCredentialController::class, 'show'])->name('show');
+        Route::post('/', [DronePilotCredentialController::class, 'store'])->name('store');
+        Route::get('{credential}/documents/{type}', [DronePilotCredentialController::class, 'document'])->name('documents');
+    });
 
     Route::middleware('role:dealer')
         ->prefix('dealer')
@@ -318,6 +327,18 @@ Route::middleware(['auth', 'verified', 'role:superadmin,admin,manager,coordinato
         Route::patch('financing/applications/{financingApplication}/review', [AdminFinancingApplicationController::class, 'review'])
             ->middleware('permission:approve_financing')
             ->name('financing.applications.review');
+        Route::get('drone-credentials', [AdminDroneCredentialController::class, 'index'])
+            ->middleware('permission:review_drone_credentials')
+            ->name('drone-credentials.index');
+        Route::post('drone-credentials/{droneCredential}/approve', [AdminDroneCredentialController::class, 'approve'])
+            ->middleware('permission:review_drone_credentials')
+            ->name('drone-credentials.approve');
+        Route::post('drone-credentials/{droneCredential}/reject', [AdminDroneCredentialController::class, 'reject'])
+            ->middleware('permission:review_drone_credentials')
+            ->name('drone-credentials.reject');
+        Route::post('drone-credentials/{droneCredential}/suspend', [AdminDroneCredentialController::class, 'suspend'])
+            ->middleware('permission:review_drone_credentials')
+            ->name('drone-credentials.suspend');
     });
 
 require __DIR__.'/settings.php';

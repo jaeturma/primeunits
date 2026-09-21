@@ -14,6 +14,7 @@ trait ResolvesRentalStockImage
     private function stockImageUrl(RentalUnit $unit): string
     {
         $image = match (true) {
+            in_array($unit->rental_type, [RentalUnit::TypeHarvesterRental, RentalUnit::TypeHarvesterService, RentalUnit::TypeDroneRental, RentalUnit::TypeDroneService], true) => 'tractor',
             $unit->rental_type === RentalUnit::TypeEquipmentRental => 'equipment',
             $unit->rental_type === RentalUnit::TypeTruckRental => 'truck',
             $unit->rental_type === RentalUnit::TypeBusRental => 'bus',

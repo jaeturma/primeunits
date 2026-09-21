@@ -1,10 +1,22 @@
 import { FormEvent } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 
+const FARM_RENTAL_TYPES = [
+    'harvester_rental',
+    'harvester_service',
+    'drone_rental',
+    'drone_service',
+];
+const DRONE_RENTAL_TYPES = ['drone_rental', 'drone_service'];
+
 export default function CreateRentalUnit({
     rental_types,
+    farm_categories = [],
+    verified_drone_pilots = [],
 }: {
     rental_types: Record<string, string>;
+    farm_categories?: { id: number; name: string }[];
+    verified_drone_pilots?: { id: number; name: string }[];
 }) {
     const currentYear = new Date().getFullYear();
 
@@ -26,7 +38,25 @@ export default function CreateRentalUnit({
         attachments: [] as File[],
         valid_id_file: null as File | null,
         or_cr_file: null as File | null,
+        category_id: '',
+        price_per_hectare: '',
+        operator_fee: '',
+        transportation_fee: '',
+        security_deposit: '',
+        fuel_included: '' as '' | '1' | '0',
+        operator_included: false,
+        transportation_included: false,
+        minimum_area_hectares: '',
+        minimum_rental_duration: '',
+        service_coverage_area: '',
+        requires_verified_drone_operator: false,
+        allows_self_operation: true,
+        intended_uses: '',
+        drone_pilot_user_id: '',
     });
+
+    const isFarmType = FARM_RENTAL_TYPES.includes(data.rental_type);
+    const isDroneType = DRONE_RENTAL_TYPES.includes(data.rental_type);
 
     function submit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -193,6 +223,314 @@ export default function CreateRentalUnit({
                             </Field>
                         </div>
                     </section>
+
+                    {isFarmType && (
+                        <section className="grid gap-4 rounded-lg border p-5">
+                            <h2 className="font-medium">
+                                Farm Equipment Details
+                            </h2>
+
+                            <Field
+                                label="Category"
+                                required
+                                error={errors.category_id}
+                            >
+                                <select
+                                    value={data.category_id}
+                                    onChange={(e) =>
+                                        setData('category_id', e.target.value)
+                                    }
+                                    required
+                                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                >
+                                    <option value="">Select category</option>
+                                    {farm_categories.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <Field
+                                    label="Rate per Hectare (PHP)"
+                                    error={errors.price_per_hectare}
+                                >
+                                    <input
+                                        type="number"
+                                        value={data.price_per_hectare}
+                                        onChange={(e) =>
+                                            setData(
+                                                'price_per_hectare',
+                                                e.target.value,
+                                            )
+                                        }
+                                        min="0"
+                                        step="0.01"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        placeholder="Optional"
+                                    />
+                                </Field>
+                                <Field
+                                    label="Minimum Area (hectares)"
+                                    error={errors.minimum_area_hectares}
+                                >
+                                    <input
+                                        type="number"
+                                        value={data.minimum_area_hectares}
+                                        onChange={(e) =>
+                                            setData(
+                                                'minimum_area_hectares',
+                                                e.target.value,
+                                            )
+                                        }
+                                        min="0"
+                                        step="0.01"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        placeholder="Optional"
+                                    />
+                                </Field>
+                                <Field
+                                    label="Operator Fee (PHP)"
+                                    error={errors.operator_fee}
+                                >
+                                    <input
+                                        type="number"
+                                        value={data.operator_fee}
+                                        onChange={(e) =>
+                                            setData(
+                                                'operator_fee',
+                                                e.target.value,
+                                            )
+                                        }
+                                        min="0"
+                                        step="0.01"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        placeholder="Optional"
+                                    />
+                                </Field>
+                                <Field
+                                    label="Transportation Fee (PHP)"
+                                    error={errors.transportation_fee}
+                                >
+                                    <input
+                                        type="number"
+                                        value={data.transportation_fee}
+                                        onChange={(e) =>
+                                            setData(
+                                                'transportation_fee',
+                                                e.target.value,
+                                            )
+                                        }
+                                        min="0"
+                                        step="0.01"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        placeholder="Optional"
+                                    />
+                                </Field>
+                                <Field
+                                    label="Security Deposit (PHP)"
+                                    error={errors.security_deposit}
+                                >
+                                    <input
+                                        type="number"
+                                        value={data.security_deposit}
+                                        onChange={(e) =>
+                                            setData(
+                                                'security_deposit',
+                                                e.target.value,
+                                            )
+                                        }
+                                        min="0"
+                                        step="0.01"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        placeholder="Optional"
+                                    />
+                                </Field>
+                                <Field
+                                    label="Fuel/Consumables"
+                                    error={errors.fuel_included}
+                                >
+                                    <select
+                                        value={data.fuel_included}
+                                        onChange={(e) =>
+                                            setData(
+                                                'fuel_included',
+                                                e.target
+                                                    .value as typeof data.fuel_included,
+                                            )
+                                        }
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                    >
+                                        <option value="">Unspecified</option>
+                                        <option value="1">Included</option>
+                                        <option value="0">Excluded</option>
+                                    </select>
+                                </Field>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.operator_included}
+                                        onChange={(e) =>
+                                            setData(
+                                                'operator_included',
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                    Operator included in base rate
+                                </label>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            data.transportation_included
+                                        }
+                                        onChange={(e) =>
+                                            setData(
+                                                'transportation_included',
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                    Transportation included in base rate
+                                </label>
+                            </div>
+
+                            <Field
+                                label="Minimum Rental Duration"
+                                error={errors.minimum_rental_duration}
+                            >
+                                <input
+                                    type="text"
+                                    value={data.minimum_rental_duration}
+                                    onChange={(e) =>
+                                        setData(
+                                            'minimum_rental_duration',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                    placeholder="e.g. 1 day, 2 hectares"
+                                />
+                            </Field>
+
+                            <Field
+                                label="Service Coverage Area"
+                                error={errors.service_coverage_area}
+                            >
+                                <textarea
+                                    value={data.service_coverage_area}
+                                    onChange={(e) =>
+                                        setData(
+                                            'service_coverage_area',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                    placeholder="Municipalities or provinces served"
+                                />
+                            </Field>
+
+                            <Field
+                                label="Intended Uses"
+                                error={errors.intended_uses}
+                            >
+                                <textarea
+                                    value={data.intended_uses}
+                                    onChange={(e) =>
+                                        setData(
+                                            'intended_uses',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                    placeholder="e.g. Crop spraying, fertilizer application, field mapping"
+                                />
+                            </Field>
+
+                            {isDroneType && (
+                                <div className="grid gap-3 rounded-md border border-dashed p-4">
+                                    <p className="text-sm font-medium">
+                                        Drone Operator Compliance
+                                    </p>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                data.requires_verified_drone_operator
+                                            }
+                                            onChange={(e) =>
+                                                setData(
+                                                    'requires_verified_drone_operator',
+                                                    e.target.checked,
+                                                )
+                                            }
+                                        />
+                                        Require a verified pilot credential
+                                        for this listing
+                                    </label>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                data.allows_self_operation
+                                            }
+                                            onChange={(e) =>
+                                                setData(
+                                                    'allows_self_operation',
+                                                    e.target.checked,
+                                                )
+                                            }
+                                        />
+                                        Allow renter self-operation (subject
+                                        to their own verified credential when
+                                        required)
+                                    </label>
+                                    <Field
+                                        label="Assigned Verified Pilot"
+                                        error={errors.drone_pilot_user_id}
+                                    >
+                                        <select
+                                            value={data.drone_pilot_user_id}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'drone_pilot_user_id',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        >
+                                            <option value="">
+                                                None assigned yet
+                                            </option>
+                                            {verified_drone_pilots.map(
+                                                (p) => (
+                                                    <option
+                                                        key={p.id}
+                                                        value={p.id}
+                                                    >
+                                                        {p.name}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </select>
+                                    </Field>
+                                    <p className="text-xs text-muted-foreground">
+                                        PrimeUnits does not issue pilot
+                                        licenses and does not guarantee
+                                        government approval. Credential
+                                        review only confirms marketplace
+                                        eligibility.
+                                    </p>
+                                </div>
+                            )}
+                        </section>
+                    )}
 
                     <section className="grid gap-4 rounded-lg border p-5">
                         <h2 className="font-medium">Location</h2>

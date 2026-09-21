@@ -56,6 +56,8 @@ class Listing extends Model
 
     public const ConditionSurplus = 'surplus';
 
+    public const ConditionReconditioned = 'reconditioned';
+
     public const TypeFree = 'FL';
 
     public const TypeCommissioned = 'CL';

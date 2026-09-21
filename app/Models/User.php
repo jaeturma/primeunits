@@ -125,6 +125,24 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<DronePilotCredential, $this>
+     */
+    public function droneCredentials(): HasMany
+    {
+        return $this->hasMany(DronePilotCredential::class);
+    }
+
+    public function latestDroneCredential(): ?DronePilotCredential
+    {
+        return $this->droneCredentials()->latest()->first();
+    }
+
+    public function hasVerifiedDroneCredential(): bool
+    {
+        return $this->latestDroneCredential()?->isActiveAndUnexpired() ?? false;
+    }
+
+    /**
      * @return HasOne<FinancingPartner, $this>
      */
     public function financingPartner(): HasOne

@@ -17,6 +17,10 @@ class RentalPackage extends Model
 
     public const DurationMonthly = 'monthly';
 
+    public const DurationPerHectare = 'per_hectare';
+
+    public const DurationFixedProject = 'fixed_project';
+
     /**
      * @return BelongsTo<RentalUnit, $this>
      */
