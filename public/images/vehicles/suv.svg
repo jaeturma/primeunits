@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="SUV illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="230" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M116 268 L140 268 L160 190 Q168 168 194 168 L420 168 Q444 168 456 188 L482 244 L524 268 Q540 268 540 284 L540 292 L100 292 L100 284 Q100 268 116 268 Z" fill="#047857"/>
+  <path d="M186 192 L212 192 L200 244 L168 244 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M226 192 L376 192 L384 244 L218 244 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M396 192 L418 192 L448 244 L410 244 Z" fill="#ECFDF5" opacity="0.9"/>
+  <rect x="100" y="284" width="440" height="14" rx="4" fill="#065F46"/>
+  <circle cx="204" cy="298" r="42" fill="#18181B"/>
+  <circle cx="204" cy="298" r="17" fill="#FAFAFA"/>
+  <circle cx="448" cy="298" r="42" fill="#18181B"/>
+  <circle cx="448" cy="298" r="17" fill="#FAFAFA"/>
+  <rect x="128" y="218" width="16" height="8" rx="3" fill="#FDE68A"/>
+  <rect x="508" y="218" width="16" height="8" rx="3" fill="#FCA5A5"/>
+</svg>

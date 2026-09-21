@@ -9,29 +9,36 @@ use App\Models\CategorySpecField;
 use App\Models\Favorite;
 use App\Models\Lead;
 use App\Models\Listing;
-use App\Models\ListingImage;
 use App\Models\ListingSpecValue;
 use App\Models\ListingView;
 use App\Models\Municipality;
 use App\Models\Province;
 use App\Models\Region;
+use App\Support\ResolvesListingStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ListingController extends Controller
 {
+    use ResolvesListingStockImage;
     use StoresResourceAttachments;
 
     public function index(Request $request): Response
     {
         $listings = Listing::query()
-            ->with(['category:id,name,slug', 'images', 'boosts'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'boosts',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->where('status', Listing::StatusApproved)
             ->withExists(['boosts as has_active_boost' => fn ($query) => $query
                 ->where('is_active', true)
@@ -113,7 +120,7 @@ class ListingController extends Controller
     {
         abort_unless($listing->user_id === $request->user()->id, 403);
 
-        $listing->load(['attachments', 'images', 'specValues.specField:id,name,label,type']);
+        $listing->load(['category:id,name,slug', 'attachments', 'images', 'specValues.specField:id,name,label,type,is_classification']);
 
         return Inertia::render('seller/listings/edit', [
             'managementPath' => $this->managementPath($request),
@@ -138,7 +145,7 @@ class ListingController extends Controller
                 ])->all(),
                 'images' => $listing->images->map(fn ($img) => [
                     'id' => $img->id,
-                    'url' => $this->listingImageUrl($img),
+                    'url' => $this->listingImageUrl($img, $listing),
                     'is_primary' => $img->is_primary,
                     'sort_order' => $img->sort_order,
                 ]),
@@ -215,7 +222,7 @@ class ListingController extends Controller
             'attachments',
             'sellerProfile.user:id,name,email',
             'dealerProfile.user:id,name,email',
-            'specValues.specField:id,name,label,type',
+            'specValues.specField:id,name,label,type,is_classification',
         ]);
 
         $user = $request->user();
@@ -255,7 +262,13 @@ class ListingController extends Controller
     {
         $listings = $request->user()
             ->listings()
-            ->with(['category:id,name,slug', 'images'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->latest()
             ->get()
             ->map(fn (Listing $listing): array => $this->serializeCard($listing));
@@ -429,7 +442,7 @@ class ListingController extends Controller
             'is_expired' => $listing->isExpired(),
             'views_count' => $listing->views_count,
             'category' => $listing->category,
-            'image_url' => $this->listingImageUrl($primaryImage),
+            'image_url' => $this->listingImageUrl($primaryImage, $listing),
             'created_at' => $listing->created_at?->toISOString(),
         ];
     }
@@ -485,11 +498,13 @@ class ListingController extends Controller
                     ],
                 ]),
             ] : null,
-            'images' => $listing->images->map(fn ($image): array => [
-                'id' => $image->id,
-                'url' => $this->listingImageUrl($image),
-                'is_primary' => $image->is_primary,
-            ]),
+            'images' => $listing->images->isNotEmpty()
+                ? $listing->images->map(fn ($image): array => [
+                    'id' => $image->id,
+                    'url' => $this->listingImageUrl($image, $listing),
+                    'is_primary' => $image->is_primary,
+                ])
+                : [['id' => 0, 'url' => $this->stockListingImageUrl($listing), 'is_primary' => true]],
             'attachments' => $this->serializeAttachments($listing),
             'specs' => $listing->specValues->map(fn (ListingSpecValue $value): array => [
                 'id' => $value->id,
@@ -535,18 +550,5 @@ class ListingController extends Controller
                     'province_name' => $municipality->province?->name,
                 ]),
         ];
-    }
-
-    private function listingImageUrl(?ListingImage $image): ?string
-    {
-        if (! $image instanceof ListingImage) {
-            return null;
-        }
-
-        if (! Storage::disk('public')->exists($image->path)) {
-            return '/images/landing-equipment-yard.png';
-        }
-
-        return Storage::disk('public')->url($image->path);
     }
 }

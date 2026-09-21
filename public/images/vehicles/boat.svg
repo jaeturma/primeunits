@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Boat illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#DBEAFE" opacity="0.6"/>
+  <path d="M120 300 Q140 316 180 316 L460 316 Q500 316 520 300 L488 254 L152 254 Z" fill="#047857"/>
+  <path d="M180 254 L180 174 L206 174 L236 254 Z" fill="#065F46"/>
+  <rect x="196" y="188" width="28" height="34" rx="4" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M320 254 L320 200 L322 200 L322 254 Z" fill="#18181B"/>
+  <path d="M322 202 L440 240 L322 250 Z" fill="#FDE68A" opacity="0.9"/>
+  <ellipse cx="320" cy="316" rx="220" ry="10" fill="#93C5FD" opacity="0.6"/>
+  <path d="M90 330 Q160 314 230 330 Q300 346 370 330 Q440 314 510 330 Q550 340 560 330" fill="none" stroke="#60A5FA" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+</svg>

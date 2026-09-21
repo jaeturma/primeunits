@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Hatchback car illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="200" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M158 264 L180 264 L204 204 Q212 188 232 188 L360 188 Q382 188 392 208 L412 250 L468 264 Q482 264 482 278 L482 288 L144 288 L144 278 Q144 264 158 264 Z" fill="#047857"/>
+  <path d="M216 208 L236 208 L226 250 L200 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M250 208 L348 208 L356 250 L242 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M362 208 L380 208 L400 250 L370 250 Z" fill="#ECFDF5" opacity="0.9"/>
+  <rect x="144" y="278" width="338" height="12" rx="4" fill="#065F46"/>
+  <circle cx="222" cy="292" r="34" fill="#18181B"/>
+  <circle cx="222" cy="292" r="14" fill="#FAFAFA"/>
+  <circle cx="404" cy="292" r="34" fill="#18181B"/>
+  <circle cx="404" cy="292" r="14" fill="#FAFAFA"/>
+</svg>

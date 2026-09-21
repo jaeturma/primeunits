@@ -34,7 +34,7 @@ type ListingCard = {
     year_model: number | null;
     province: string | null;
     municipality: string | null;
-    image_url: string | null;
+    image_url: string;
     is_featured: boolean;
     category: { name: string; slug: string };
 };
@@ -585,17 +585,11 @@ function ListingCard({ listing }: { listing: ListingCard }) {
             className="group overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md"
         >
             <div className="aspect-video overflow-hidden bg-muted">
-                {listing.image_url ? (
-                    <img
-                        src={listing.image_url}
-                        alt={listing.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground/40">
-                        <Truck className="size-10" />
-                    </div>
-                )}
+                <img
+                    src={listing.image_url}
+                    alt={listing.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
             </div>
             <div className="space-y-2 p-4">
                 <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">

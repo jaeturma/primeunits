@@ -358,6 +358,6 @@ class RentalController extends Controller
             default => 'sedan',
         };
 
-        return "/images/rentals/{$image}.svg";
+        return "/images/vehicles/{$image}.svg";
     }
 }

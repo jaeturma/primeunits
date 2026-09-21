@@ -8,20 +8,21 @@ use App\Models\CategorySpecField;
 use App\Models\LandingAd;
 use App\Models\LandingPage;
 use App\Models\Listing;
-use App\Models\ListingImage;
 use App\Models\Municipality;
 use App\Models\Province;
 use App\Models\Region;
 use App\Models\RentalUnit;
+use App\Support\ResolvesListingStockImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
 
 class HomeController extends Controller
 {
+    use ResolvesListingStockImage;
+
     public function __invoke(Request $request): Response
     {
         $baseListings = $this->approvedListings($request);
@@ -138,7 +139,14 @@ class HomeController extends Controller
     private function approvedListings(Request $request): Builder
     {
         return Listing::query()
-            ->with(['category:id,name,slug', 'images', 'boosts'])
+            ->with([
+                'category:id,name,slug',
+                'images',
+                'boosts',
+                'specValues' => fn ($query) => $query
+                    ->whereHas('specField', fn ($query) => $query->where('is_classification', true))
+                    ->with('specField:id,name,is_classification'),
+            ])
             ->where('status', Listing::StatusApproved)
             ->withExists(['boosts as has_active_boost' => fn ($query) => $query
                 ->where('is_active', true)
@@ -460,20 +468,7 @@ class HomeController extends Controller
                 'name' => $listing->category->name,
                 'slug' => $listing->category->slug,
             ],
-            'image_url' => $this->listingImageUrl($primaryImage),
+            'image_url' => $this->listingImageUrl($primaryImage, $listing),
         ];
-    }
-
-    private function listingImageUrl(?ListingImage $image): ?string
-    {
-        if (! $image instanceof ListingImage) {
-            return null;
-        }
-
-        if (! Storage::disk('public')->exists($image->path)) {
-            return '/images/landing-equipment-yard.png';
-        }
-
-        return Storage::disk('public')->url($image->path);
     }
 }

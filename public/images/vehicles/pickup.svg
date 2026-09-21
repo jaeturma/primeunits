@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Pickup truck illustration">
+  <rect width="640" height="360" fill="#F4F4F5"/>
+  <rect y="300" width="640" height="60" fill="#E4E4E7"/>
+  <ellipse cx="320" cy="298" rx="240" ry="14" fill="#D4D4D8" opacity="0.6"/>
+  <path d="M110 270 L134 270 L160 202 Q168 184 190 184 L286 184 Q304 184 312 200 L332 244 L110 244 Z" fill="#047857"/>
+  <path d="M180 206 L198 206 L188 244 L162 244 Z" fill="#ECFDF5" opacity="0.9"/>
+  <path d="M212 206 L280 206 L294 244 L206 244 Z" fill="#ECFDF5" opacity="0.9"/>
+  <rect x="332" y="222" width="196" height="48" rx="6" fill="#065F46"/>
+  <rect x="344" y="230" width="172" height="10" fill="#047857" opacity="0.5"/>
+  <rect x="110" y="270" width="418" height="14" rx="4" fill="#18181B"/>
+  <circle cx="198" cy="284" r="36" fill="#18181B"/>
+  <circle cx="198" cy="284" r="15" fill="#FAFAFA"/>
+  <circle cx="452" cy="284" r="36" fill="#18181B"/>
+  <circle cx="452" cy="284" r="15" fill="#FAFAFA"/>
+</svg>

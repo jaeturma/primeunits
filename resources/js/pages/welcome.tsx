@@ -80,7 +80,7 @@ type ListingCard = {
     year_model: number | null;
     province: string | null;
     municipality: string | null;
-    image_url: string | null;
+    image_url: string;
     is_featured: boolean;
     category: { name: string; slug: string };
 };
@@ -1511,20 +1511,12 @@ function MarketplaceAdCard({ ad }: { ad: LandingAd }) {
 }
 
 function MarketplaceImage({ listing }: { listing: ListingCard }) {
-    if (listing.image_url) {
-        return (
-            <img
-                src={listing.image_url}
-                alt={listing.title}
-                className="h-[180px] w-full object-cover transition duration-200 group-hover:scale-[1.02]"
-            />
-        );
-    }
-
     return (
-        <div className="flex h-[180px] items-center justify-center bg-zinc-100 text-zinc-400">
-            <Truck className="size-8" />
-        </div>
+        <img
+            src={listing.image_url}
+            alt={listing.title}
+            className="h-[180px] w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+        />
     );
 }
 
