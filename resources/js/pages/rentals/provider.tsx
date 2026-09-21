@@ -14,7 +14,7 @@ type Rental = {
     price_per_day: string;
     municipality: string | null;
     province: string | null;
-    image_url: string | null;
+    image_url: string;
 };
 
 type PaginatedRentals = {
@@ -59,7 +59,7 @@ export default function RentalProviderPortal({
                         {rentals.data.map((rental) => (
                             <Link key={rental.id} href={`/rentals/${provider.username}/${rental.slug}`} className="overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
                                 <div className="aspect-video bg-muted">
-                                    {rental.image_url ? <img src={rental.image_url} alt={rental.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Truck className="size-10 text-muted-foreground/40" /></div>}
+                                    <img src={rental.image_url} alt={rental.name} className="h-full w-full object-cover" />
                                 </div>
                                 <div className="space-y-2 p-4">
                                     <span className="text-xs font-medium text-emerald-700">{rental.rental_type_label}</span>

@@ -10,7 +10,7 @@ type ListingCard = {
     model: string | null;
     status_label: string;
     rejected_reason: string | null;
-    image_url: string | null;
+    image_url: string;
     category: { name: string };
 };
 
@@ -46,13 +46,11 @@ export default function SellerListings({
                     {listings.map((listing) => (
                         <article key={listing.id} className="rounded-lg border">
                             <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                                {listing.image_url && (
-                                    <img
-                                        src={listing.image_url}
-                                        alt=""
-                                        className="h-full w-full object-cover"
-                                    />
-                                )}
+                                <img
+                                    src={listing.image_url}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                />
                             </div>
                             <div className="space-y-3 p-4">
                                 <div className="flex items-start justify-between gap-2">

@@ -14,7 +14,7 @@ type RentalUnit = {
     region: string | null;
     municipality: string | null;
     views_count: number;
-    image_url: string | null;
+    image_url: string;
 };
 
 export default function RentalProviderUnits({
@@ -70,17 +70,11 @@ export default function RentalProviderUnits({
                                 className="flex gap-4 rounded-lg border bg-card p-4"
                             >
                                 <div className="h-20 w-32 shrink-0 overflow-hidden rounded-md bg-muted">
-                                    {unit.image_url ? (
-                                        <img
-                                            src={unit.image_url}
-                                            alt={unit.name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                                            No image
-                                        </div>
-                                    )}
+                                    <img
+                                        src={unit.image_url}
+                                        alt={unit.name}
+                                        className="h-full w-full object-cover"
+                                    />
                                 </div>
                                 <div className="flex flex-1 flex-wrap items-start gap-4">
                                     <div className="min-w-0 flex-1">
