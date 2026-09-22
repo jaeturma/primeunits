@@ -20,7 +20,9 @@ test('users seeder creates demo users with roles and seller profiles', function 
     $seller = User::query()->where('email', 'seller.cebu@prime.test')->firstOrFail();
     $buyer = User::query()->where('email', 'buyer.miguel@prime.test')->firstOrFail();
 
-    expect(User::query()->count())->toBe(9)
+    // 9 base demo users + 6 financing-partner users created by the
+    // DemoSeeder that UsersSeeder chains in.
+    expect(User::query()->count())->toBe(15)
         ->and(Hash::check('super123', $admin->password))->toBeTrue()
         ->and($admin->hasRole('superadmin'))->toBeTrue()
         ->and($insuranceManager->hasRole('insurance_manager'))->toBeTrue()

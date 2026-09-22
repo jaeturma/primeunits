@@ -78,7 +78,7 @@ test('admin dashboard renders aggregate analytics', function () {
     $seller = analyticsSeller('Top Seller');
     $buyer = User::factory()->create();
     analyticsRole($buyer, 'buyer');
-    $category = Category::query()->where('slug', 'vehicle')->firstOrFail();
+    $category = Category::query()->where('slug', 'cars')->firstOrFail();
     $listing = analyticsListing($seller, $category, 'Loader Unit');
     $lead = analyticsLead($listing, $buyer, Lead::StatusClosed);
     $transaction = Transaction::query()->create([
@@ -138,8 +138,8 @@ test('analytics endpoints support category and location filters', function () {
     $seller = analyticsSeller();
     $buyer = User::factory()->create();
     analyticsRole($buyer, 'buyer');
-    $vehicle = Category::query()->where('slug', 'vehicle')->firstOrFail();
-    $property = Category::query()->where('slug', 'heavy_equipment')->firstOrFail();
+    $vehicle = Category::query()->where('slug', 'cars')->firstOrFail();
+    $property = Category::query()->where('slug', 'heavy-equipment')->firstOrFail();
     $cebuListing = analyticsListing($seller, $vehicle, 'Cebu Vehicle', 'Cebu');
     $boholListing = analyticsListing($seller, $property, 'Bohol Property', 'Bohol');
 

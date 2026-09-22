@@ -3,8 +3,8 @@
 use App\Models\Category;
 use App\Models\Listing;
 use App\Models\Role;
-use App\Models\SeoPage;
 use App\Models\SellerProfile;
+use App\Models\SeoPage;
 use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\RbacSeeder;
@@ -55,19 +55,19 @@ function seoListing(User $seller, Category $category, string $title, string $pro
 
 test('category seo page renders metadata and relevant approved listings', function () {
     $seller = seoSeller();
-    $vehicle = Category::query()->where('slug', 'vehicle')->firstOrFail();
-    $heavy = Category::query()->where('slug', 'heavy_equipment')->firstOrFail();
+    $vehicle = Category::query()->where('slug', 'cars')->firstOrFail();
+    $heavy = Category::query()->where('slug', 'heavy-equipment')->firstOrFail();
 
     seoListing($seller, $vehicle, 'SEO Pickup', 'Cebu');
     seoListing($seller, $vehicle, 'Draft Pickup', 'Cebu', Listing::StatusPending);
     seoListing($seller, $heavy, 'SEO Loader', 'Cebu');
 
-    $this->get(route('seo.category', 'vehicles'))
+    $this->get(route('seo.category', 'cars'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('seo/landing')
-            ->where('seoPage.meta_title', 'Vehicles for Sale | PrimeUnits Philippines')
-            ->where('seoPage.category.slug', 'vehicle')
+            ->where('seoPage.meta_title', 'Cars for Sale | PrimeUnits Philippines')
+            ->where('seoPage.category.slug', 'cars')
             ->where('listings.data.0.title', 'SEO Pickup')
             ->has('listings.data', 1),
         );
@@ -75,12 +75,12 @@ test('category seo page renders metadata and relevant approved listings', functi
 
 test('category location seo page filters by province and supports request filters', function () {
     $seller = seoSeller();
-    $vehicle = Category::query()->where('slug', 'vehicle')->firstOrFail();
+    $vehicle = Category::query()->where('slug', 'cars')->firstOrFail();
 
     seoListing($seller, $vehicle, 'Cebu Hilux', 'Cebu');
     seoListing($seller, $vehicle, 'Davao Hilux', 'Davao del Sur');
 
-    $this->get(route('seo.category-location', ['category' => 'vehicles', 'location' => 'cebu']))
+    $this->get(route('seo.category-location', ['category' => 'cars', 'location' => 'cebu']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('seo/landing')
@@ -90,7 +90,7 @@ test('category location seo page filters by province and supports request filter
         );
 
     $this->get(route('seo.category-location', [
-        'category' => 'vehicles',
+        'category' => 'cars',
         'location' => 'cebu',
         'q' => 'missing',
     ]))
@@ -104,5 +104,5 @@ test('category location seo page filters by province and supports request filter
 
 test('seo page definitions are stored in the database', function () {
     expect(SeoPage::query()->where('slug', 'heavy-equipment/cebu')->exists())->toBeTrue()
-        ->and(SeoPage::query()->where('slug', 'farm-equipment/mindanao')->exists())->toBeTrue();
+        ->and(SeoPage::query()->where('slug', 'agricultural-equipment/mindanao')->exists())->toBeTrue();
 });
