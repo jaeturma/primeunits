@@ -7,6 +7,7 @@ import {
     LayoutGrid,
     ListChecks,
     MapPin,
+    Megaphone,
     Store,
     Users,
 } from 'lucide-react';
@@ -42,7 +43,13 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth, notificationSummary } = usePage().props;
     const canUseAdmin = auth.roles.some((role) =>
-        ['superadmin', 'admin', 'manager', 'coordinator', 'insurance_manager'].includes(role),
+        [
+            'superadmin',
+            'admin',
+            'manager',
+            'coordinator',
+            'insurance_manager',
+        ].includes(role),
     );
     const isSeller = auth.roles.includes('seller');
     const isBuyer = auth.roles.includes('buyer');
@@ -113,6 +120,11 @@ export function AppSidebar() {
                                 href: '/adm/payments',
                                 icon: Handshake,
                             },
+                            {
+                                title: 'Promotions',
+                                href: '/adm/promotions',
+                                icon: Megaphone,
+                            },
                         ]
                       : []),
                   ...(can('manage_users')
@@ -162,12 +174,26 @@ export function AppSidebar() {
                         ]
                       : []),
                   ...(can('manage_dealers')
-                      ? [{ title: 'Dealer Applications', href: '/adm/dealers', icon: Store }]
+                      ? [
+                            {
+                                title: 'Dealer Applications',
+                                href: '/adm/dealers',
+                                icon: Store,
+                            },
+                        ]
                       : []),
                   ...(can('manage_rentals')
                       ? [
-                            { title: 'Rental Unit Review', href: '/adm/rentals', icon: ListChecks },
-                            { title: 'Rental Owner Applications', href: '/adm/rental-profiles', icon: Store },
+                            {
+                                title: 'Rental Unit Review',
+                                href: '/adm/rentals',
+                                icon: ListChecks,
+                            },
+                            {
+                                title: 'Rental Owner Applications',
+                                href: '/adm/rental-profiles',
+                                icon: Store,
+                            },
                         ]
                       : []),
               ]
@@ -207,15 +233,35 @@ export function AppSidebar() {
             : []),
         ...(isDealer
             ? [
-                  { title: 'Dealer Status', href: '/dealer/status', icon: Store },
-                  { title: 'Dealer Units', href: '/dealer/units', icon: ListChecks },
+                  {
+                      title: 'Dealer Status',
+                      href: '/dealer/status',
+                      icon: Store,
+                  },
+                  {
+                      title: 'Dealer Units',
+                      href: '/dealer/units',
+                      icon: ListChecks,
+                  },
               ]
             : []),
         ...(isRentalProvider
             ? [
-                  { title: 'Business Verification', href: '/rental-provider/profile', icon: Store },
-                  { title: 'Rental Units', href: '/rental-provider/units', icon: Store },
-                  { title: 'Rental Bookings', href: '/rental-provider/bookings', icon: Handshake },
+                  {
+                      title: 'Business Verification',
+                      href: '/rental-provider/profile',
+                      icon: Store,
+                  },
+                  {
+                      title: 'Rental Units',
+                      href: '/rental-provider/units',
+                      icon: Store,
+                  },
+                  {
+                      title: 'Rental Bookings',
+                      href: '/rental-provider/bookings',
+                      icon: Handshake,
+                  },
               ]
             : []),
     ];
