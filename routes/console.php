@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('drone-credentials:expire')->daily();
+Schedule::command('membership:sync-access-expiry')->daily();
