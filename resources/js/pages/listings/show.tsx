@@ -22,6 +22,8 @@ type RestrictedListing = {
     price_on_request: boolean;
     region: string | null;
     tier: string;
+    seller_capacity: string | null;
+    seller_capacity_label: string | null;
 };
 
 type Listing = {
@@ -50,6 +52,8 @@ type Listing = {
     visibility_label: string;
     masked_registration_number: string | null;
     is_gold_candidate: boolean;
+    seller_capacity: string | null;
+    seller_capacity_label: string | null;
     current_lead: {
         id: number;
         reference_code: string;
@@ -92,6 +96,11 @@ function RestrictedListingView({ listing }: { listing: RestrictedListing }) {
                             <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-700">
                                 {listing.visibility_label}
                             </span>
+                            {listing.seller_capacity_label && (
+                                <span className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold text-zinc-600">
+                                    {listing.seller_capacity_label}
+                                </span>
+                            )}
                         </div>
                         <h1 className="mt-3 text-2xl font-semibold tracking-normal">
                             {listing.title}
@@ -303,15 +312,23 @@ function FullListingView({ listing }: { listing: Listing }) {
                             {listing.category.name}
                             {listing.is_featured && ' - Featured'}
                         </p>
-                        {listing.marketplace_tier !== 'regular' && (
+                        {(listing.marketplace_tier !== 'regular' ||
+                            listing.seller_capacity_label) && (
                             <div className="mt-2 flex flex-wrap gap-2">
-                                <TierBadge
-                                    tier={listing.marketplace_tier}
-                                    label={listing.tier_label}
-                                />
+                                {listing.marketplace_tier !== 'regular' && (
+                                    <TierBadge
+                                        tier={listing.marketplace_tier}
+                                        label={listing.tier_label}
+                                    />
+                                )}
                                 {listing.is_gold_candidate && (
                                     <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-700">
                                         Gold candidate — pending review
+                                    </span>
+                                )}
+                                {listing.seller_capacity_label && (
+                                    <span className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold text-zinc-600">
+                                        {listing.seller_capacity_label}
                                     </span>
                                 )}
                             </div>

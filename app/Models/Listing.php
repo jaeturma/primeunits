@@ -255,6 +255,20 @@ class Listing extends Model
         };
     }
 
+    public function sellerCapacityLabel(): ?string
+    {
+        return match ($this->seller_capacity) {
+            self::CapacityPrivateOwner => 'Private Owner',
+            self::CapacityAuthorizedDealer => 'Authorized Dealer',
+            self::CapacityIndependentBroker => 'Independent Broker',
+            self::CapacityBrokerageCompany => 'Brokerage Company',
+            self::CapacityCharterOperator => 'Charter Operator',
+            self::CapacityFleetOrCorporateOwner => 'Fleet or Corporate Owner',
+            self::CapacityManufacturerOrDistributor => 'Manufacturer or Distributor',
+            default => null,
+        };
+    }
+
     public function maskedRegistrationNumber(): ?string
     {
         if (blank($this->registration_number)) {
