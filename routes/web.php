@@ -16,6 +16,7 @@ use App\Http\Controllers\Adm\LocationController as AdminLocationController;
 use App\Http\Controllers\Adm\MembershipApplicationController as AdminMembershipApplicationController;
 use App\Http\Controllers\Adm\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Adm\PlanController as AdminPlanController;
+use App\Http\Controllers\Adm\PromotionAnalyticsController;
 use App\Http\Controllers\Adm\RentalController as AdminRentalController;
 use App\Http\Controllers\Adm\RentalProfileController as AdminRentalProfileController;
 use App\Http\Controllers\Adm\SellerProfileController as AdminSellerProfileController;
@@ -224,6 +225,9 @@ Route::middleware(['auth', 'verified', 'role:superadmin,admin,manager,coordinato
         Route::get('analytics/conversions', [AnalyticsController::class, 'conversionStats'])
             ->middleware('permission:view_reports')
             ->name('analytics.conversions');
+        Route::get('promotions', [PromotionAnalyticsController::class, 'index'])
+            ->middleware('permission:view_reports')
+            ->name('promotions.index');
         Route::get('sellers', [AdminSellerProfileController::class, 'index'])
             ->middleware('permission:verify_sellers')
             ->name('sellers.index');
