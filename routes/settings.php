@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\MembershipController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Support\Facades\Route;
@@ -21,4 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    Route::get('settings/membership', [MembershipController::class, 'edit'])->name('membership.edit');
+    Route::post('settings/membership/mode', [MembershipController::class, 'switchMode'])->name('membership.switch-mode');
 });

@@ -38,7 +38,7 @@ const regions = [
 export function PublicFooter() {
     return (
         <footer className="border-t border-zinc-800 bg-zinc-950 text-white">
-            <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:px-6">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:px-6">
                 <div>
                     <Link
                         href="/"

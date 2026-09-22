@@ -1,5 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Truck } from 'lucide-react';
+import { ChevronDown, Menu, Truck } from 'lucide-react';
+import { useState } from 'react';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { dashboard, login } from '@/routes';
 
 const financingMenuItems = [
@@ -8,8 +15,26 @@ const financingMenuItems = [
     { title: 'Sangla OR/CR', href: '/financing?type=sangla-or-cr' },
 ];
 
+const navLinks = [
+    { title: 'Sell', href: '/seller/apply' },
+    { title: 'Rent', href: '/rentals' },
+    { title: 'Insurance', href: '/insurance' },
+    { title: 'Financing', href: '/financing' },
+    { title: 'Ask', href: '/contact-us' },
+];
+
+const modeLabels: Record<string, string> = {
+    regular: 'Regular',
+    silver: 'Silver',
+    gold: 'Gold',
+};
+
 export function PublicHeader() {
-    const { auth } = usePage().props;
+    const { auth, marketplaceMode } = usePage().props;
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    const showModeBadge =
+        auth.user && marketplaceMode && marketplaceMode !== 'regular';
 
     return (
         <header className="border-b border-zinc-200 bg-white">
@@ -18,32 +43,37 @@ export function PublicHeader() {
                     href="/"
                     className="flex items-center gap-3 font-semibold"
                 >
-                    <span className="flex size-10 items-center justify-center rounded-md bg-emerald-600 text-white">
+                    <span className="flex size-10 items-center justify-center rounded-md bg-brand-primary text-white">
                         <Truck className="size-5" />
                     </span>
                     <span className="text-xl">PrimeUnits</span>
+                    {showModeBadge && (
+                        <span className="rounded-full bg-brand-badge-background px-2 py-0.5 text-xs font-semibold text-brand-badge-foreground capitalize">
+                            {modeLabels[marketplaceMode] ?? marketplaceMode}
+                        </span>
+                    )}
                 </Link>
 
-                <nav className="flex items-center gap-1 text-sm">
+                <nav className="hidden items-center gap-1 text-sm md:flex">
                     <Link
                         href="/seller/apply"
-                        className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
+                        className="rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
                     >
                         Sell
                     </Link>
                     <Link
                         href="/rentals"
-                        className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
+                        className="rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
                     >
                         Rent
                     </Link>
                     <Link
                         href="/insurance"
-                        className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
+                        className="rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
                     >
                         Insurance
                     </Link>
-                    <div className="group relative hidden md:block">
+                    <div className="group relative">
                         <Link
                             href="/financing"
                             className="inline-flex items-center rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
@@ -65,7 +95,7 @@ export function PublicHeader() {
                     </div>
                     <Link
                         href="/contact-us"
-                        className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
+                        className="rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
                     >
                         Ask
                     </Link>
@@ -85,6 +115,67 @@ export function PublicHeader() {
                         </Link>
                     )}
                 </nav>
+
+                <div className="flex items-center gap-2 md:hidden">
+                    {auth.user ? (
+                        <Link
+                            href={dashboard()}
+                            className="flex h-11 items-center rounded-md bg-zinc-950 px-3 text-sm font-semibold text-white"
+                        >
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <Link
+                            href={login()}
+                            className="flex h-11 items-center rounded-md bg-zinc-950 px-3 text-sm font-semibold text-white"
+                        >
+                            Login
+                        </Link>
+                    )}
+                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                        <button
+                            type="button"
+                            onClick={() => setMobileOpen(true)}
+                            className="flex size-11 items-center justify-center rounded-md border border-zinc-300 text-zinc-700"
+                            aria-label="Open menu"
+                        >
+                            <Menu className="size-5" />
+                        </button>
+                        <SheetContent
+                            side="right"
+                            className="w-full sm:max-w-xs"
+                        >
+                            <SheetHeader>
+                                <SheetTitle>Menu</SheetTitle>
+                            </SheetHeader>
+                            <nav className="flex flex-col gap-1 px-4 pb-4">
+                                {navLinks.map((item) => (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setMobileOpen(false)}
+                                        className="flex min-h-11 items-center rounded-md px-3 text-base font-medium text-zinc-800 hover:bg-zinc-100"
+                                    >
+                                        {item.title}
+                                    </Link>
+                                ))}
+                                {showModeBadge && (
+                                    <Link
+                                        href="/settings/membership"
+                                        onClick={() => setMobileOpen(false)}
+                                        className="mt-2 flex min-h-11 items-center gap-2 rounded-md border border-brand-border bg-brand-surface-muted px-3 text-base font-medium text-brand-accent-strong"
+                                    >
+                                        <span className="rounded-full bg-brand-badge-background px-2 py-0.5 text-xs font-semibold text-brand-badge-foreground capitalize">
+                                            {modeLabels[marketplaceMode] ??
+                                                marketplaceMode}
+                                        </span>
+                                        Marketplace mode
+                                    </Link>
+                                )}
+                            </nav>
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
         </header>
     );

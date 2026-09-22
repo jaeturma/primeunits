@@ -112,7 +112,7 @@ export default function SeoLanding({
 
                         <form
                             onSubmit={submit}
-                            className="grid gap-2 bg-background/95 p-3 text-foreground shadow-lg backdrop-blur md:grid-cols-[1.4fr_1fr_1fr_1fr_auto]"
+                            className="grid grid-cols-1 gap-2 bg-background/95 p-3 text-foreground shadow-lg backdrop-blur md:grid-cols-[1.4fr_1fr_1fr_1fr_auto]"
                         >
                             <div className="relative">
                                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />

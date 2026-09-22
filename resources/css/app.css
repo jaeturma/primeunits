@@ -59,6 +59,24 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* PrimeUnits tier theme (Regular / Silver / Gold) — see the
+       [data-marketplace-mode] blocks below. Green is always the primary
+       brand color; Silver/Gold only change the accent, surface, border,
+       ring, and badge tokens. */
+    --color-brand-primary: var(--brand-primary);
+    --color-brand-primary-hover: var(--brand-primary-hover);
+    --color-brand-accent: var(--brand-accent);
+    --color-brand-accent-soft: var(--brand-accent-soft);
+    --color-brand-accent-strong: var(--brand-accent-strong);
+    --color-brand-surface: var(--brand-surface);
+    --color-brand-surface-muted: var(--brand-surface-muted);
+    --color-brand-border: var(--brand-border);
+    --color-brand-ring: var(--brand-ring);
+    --color-brand-badge-background: var(--brand-badge-background);
+    --color-brand-badge-foreground: var(--brand-badge-foreground);
+    --color-brand-gradient-start: var(--brand-gradient-start);
+    --color-brand-gradient-end: var(--brand-gradient-end);
 }
 
 :root {
@@ -97,6 +115,52 @@
     --sidebar-ring: oklch(0.87 0 0);
 }
 
+:root {
+    /* Regular (default): the existing PrimeUnits green identity. */
+    --brand-primary: #059669;
+    --brand-primary-hover: #047857;
+    --brand-accent: #059669;
+    --brand-accent-soft: #d1fae5;
+    --brand-accent-strong: #047857;
+    --brand-surface: #ffffff;
+    --brand-surface-muted: #ecfdf5;
+    --brand-border: #a7f3d0;
+    --brand-ring: #10b981;
+    --brand-badge-background: #d1fae5;
+    --brand-badge-foreground: #047857;
+    --brand-gradient-start: #059669;
+    --brand-gradient-end: #10b981;
+}
+
+:root[data-marketplace-mode='silver'] {
+    /* Silver: green stays primary; cool neutral premium accents blend in. */
+    --brand-accent: #64748b;
+    --brand-accent-soft: #f1f5f9;
+    --brand-accent-strong: #334155;
+    --brand-surface: #f8fafc;
+    --brand-surface-muted: #f1f5f9;
+    --brand-border: #cbd5e1;
+    --brand-ring: #94a3b8;
+    --brand-badge-background: #e2e8f0;
+    --brand-badge-foreground: #334155;
+    --brand-gradient-end: #94a3b8;
+}
+
+:root[data-marketplace-mode='gold'] {
+    /* Gold: green stays primary; restrained warm gold accents blend in
+       (no bright yellow, shine, or animated glitter — see design spec). */
+    --brand-accent: #b45309;
+    --brand-accent-soft: #fef3c7;
+    --brand-accent-strong: #92400e;
+    --brand-surface: #fffbeb;
+    --brand-surface-muted: #fef3c7;
+    --brand-border: #fde68a;
+    --brand-ring: #d97706;
+    --brand-badge-background: #fde68a;
+    --brand-badge-foreground: #92400e;
+    --brand-gradient-end: #d97706;
+}
+
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
@@ -130,6 +194,46 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+
+    --brand-primary: #10b981;
+    --brand-primary-hover: #34d399;
+    --brand-accent: #10b981;
+    --brand-accent-soft: #064e3b;
+    --brand-accent-strong: #6ee7b7;
+    --brand-surface: #0a0a0a;
+    --brand-surface-muted: #0f1f19;
+    --brand-border: #065f46;
+    --brand-ring: #34d399;
+    --brand-badge-background: #064e3b;
+    --brand-badge-foreground: #6ee7b7;
+    --brand-gradient-start: #059669;
+    --brand-gradient-end: #34d399;
+}
+
+.dark[data-marketplace-mode='silver'] {
+    --brand-accent: #94a3b8;
+    --brand-accent-soft: #1e293b;
+    --brand-accent-strong: #cbd5e1;
+    --brand-surface: #0f172a;
+    --brand-surface-muted: #1e293b;
+    --brand-border: #334155;
+    --brand-ring: #94a3b8;
+    --brand-badge-background: #1e293b;
+    --brand-badge-foreground: #cbd5e1;
+    --brand-gradient-end: #94a3b8;
+}
+
+.dark[data-marketplace-mode='gold'] {
+    --brand-accent: #d97706;
+    --brand-accent-soft: #451a03;
+    --brand-accent-strong: #fbbf24;
+    --brand-surface: #1c1408;
+    --brand-surface-muted: #292118;
+    --brand-border: #92400e;
+    --brand-ring: #d97706;
+    --brand-badge-background: #451a03;
+    --brand-badge-foreground: #fbbf24;
+    --brand-gradient-end: #d97706;
 }
 
 @layer base {

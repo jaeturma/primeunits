@@ -6,6 +6,7 @@ use App\Http\Requests\StoreListingRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\CategorySpecField;
+use App\Models\ConfidentialAccessLog;
 use App\Models\Favorite;
 use App\Models\Lead;
 use App\Models\Listing;
@@ -14,6 +15,7 @@ use App\Models\ListingView;
 use App\Models\Municipality;
 use App\Models\Province;
 use App\Models\Region;
+use App\Services\ListingVisibilityService;
 use App\Support\ResolvesListingStockImage;
 use App\Support\StoresResourceAttachments;
 use Illuminate\Http\JsonResponse;
@@ -40,6 +42,7 @@ class ListingController extends Controller
                     ->with('specField:id,name,is_classification'),
             ])
             ->where('status', Listing::StatusApproved)
+            ->visibleTo($request->user())
             ->withExists(['boosts as has_active_boost' => fn ($query) => $query
                 ->where('is_active', true)
                 ->where('ends_at', '>', now())])
@@ -169,9 +172,10 @@ class ListingController extends Controller
     public function store(StoreListingRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $category = Category::query()->with('specFields')->findOrFail($request->integer('category_id'));
+        $category = Category::query()->with(['specFields', 'accessRule'])->findOrFail($request->integer('category_id'));
+        $rule = $category->accessRule;
 
-        DB::transaction(function () use ($request, $user, $category): void {
+        DB::transaction(function () use ($request, $user, $category, $rule): void {
             $listing = Listing::query()->create([
                 ...$request->listingData(),
                 'user_id' => $user->id,
@@ -188,6 +192,11 @@ class ListingController extends Controller
                 'manager_accepted_by' => null,
                 'manager_accepted_at' => null,
                 'approved_by' => null,
+                'marketplace_tier' => $rule?->default_marketplace_tier ?? Listing::TierRegular,
+                'visibility_level' => Listing::VisibilityPublic,
+                'confidentiality_required' => $rule?->confidentiality_required ?? false,
+                'seller_capacity' => $request->input('seller_capacity')
+                    ?? ($user->dealerProfile ? Listing::CapacityAuthorizedDealer : Listing::CapacityPrivateOwner),
                 ...$request->storedIdentityDocuments(),
             ]);
 
@@ -212,9 +221,10 @@ class ListingController extends Controller
         return redirect()->to($this->managementPath($request));
     }
 
-    public function show(Request $request, Listing $listing): Response
+    public function show(Request $request, Listing $listing, ListingVisibilityService $visibility): Response
     {
         abort_unless($listing->isApproved(), 404);
+        abort_unless($visibility->canViewPage($request->user(), $listing), 404);
 
         $listing->load([
             'category:id,name,slug',
@@ -224,6 +234,35 @@ class ListingController extends Controller
             'dealerProfile.user:id,name,email',
             'specValues.specField:id,name,label,type,is_classification',
         ]);
+
+        $canViewFull = $visibility->canViewFull($request->user(), $listing);
+
+        if ($listing->isRestrictedVisibility() || $listing->visibility_level === Listing::VisibilityPublicPreview) {
+            $visibility->logAccess($request->user(), $listing, $canViewFull
+                ? ConfidentialAccessLog::ActionViewedFull
+                : ConfidentialAccessLog::ActionViewedPreview);
+        }
+
+        if (! $canViewFull) {
+            return Inertia::render('listings/show', [
+                'listing' => [
+                    'id' => $listing->id,
+                    'slug' => $listing->slug,
+                    'title' => $listing->title,
+                    'marketplace_tier' => $listing->marketplace_tier,
+                    'tier_label' => $listing->tierLabel(),
+                    'visibility_level' => $listing->visibility_level,
+                    'visibility_label' => $listing->visibilityLabel(),
+                    'can_view_full' => false,
+                    'can_request_access' => $visibility->canRequestAccess($request->user(), $listing),
+                    'has_pending_access_request' => $request->user() ? $listing->accessRequests()
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'pending')
+                        ->exists() : false,
+                    ...$visibility->redactedPreview($listing),
+                ],
+            ]);
+        }
 
         $user = $request->user();
         $ip = $request->ip();
@@ -426,7 +465,8 @@ class ListingController extends Controller
             'id' => $listing->id,
             'title' => $listing->title,
             'slug' => $listing->slug,
-            'price' => $listing->price,
+            'price' => $listing->price_on_request ? null : $listing->price,
+            'price_on_request' => $listing->price_on_request,
             'negotiable' => $listing->negotiable,
             'condition' => $listing->condition,
             'brand' => $listing->brand,
@@ -445,6 +485,11 @@ class ListingController extends Controller
             'category' => $listing->category,
             'image_url' => $this->listingImageUrl($primaryImage, $listing),
             'created_at' => $listing->created_at?->toISOString(),
+            'marketplace_tier' => $listing->marketplace_tier,
+            'tier_label' => $listing->tierLabel(),
+            'visibility_level' => $listing->visibility_level,
+            'visibility_label' => $listing->visibilityLabel(),
+            'seller_capacity' => $listing->seller_capacity,
         ];
     }
 
@@ -480,6 +525,9 @@ class ListingController extends Controller
             'municipality' => $listing->municipality,
             'barangay' => $canViewContact ? $listing->barangay : null,
             'can_view_contact' => $canViewContact,
+            'can_view_full' => true,
+            'masked_registration_number' => $listing->maskedRegistrationNumber(),
+            'is_gold_candidate' => $listing->is_gold_candidate,
             'seller' => $canViewContact && $ownerProfile ? [
                 'name' => $ownerProfile->user->name,
                 'email' => $ownerProfile->user->email,

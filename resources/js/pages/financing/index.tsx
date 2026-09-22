@@ -66,7 +66,7 @@ export default function FinancingIndex({
             <PublicHeader />
             <main className="bg-[#f4f5f2] text-zinc-950">
                 <section className="border-b border-zinc-200 bg-white">
-                    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_420px] lg:px-6">
+                    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-[1fr_420px] lg:px-6">
                         <div className="flex flex-col justify-center">
                             <p className="text-sm font-semibold text-emerald-700">
                                 Auto loans made easier
@@ -160,7 +160,7 @@ export default function FinancingIndex({
                     </div>
                 </section>
 
-                <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[1fr_420px] lg:px-6">
+                <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-[1fr_420px] lg:px-6">
                     <div>
                         <h2 className="text-xl font-semibold">
                             Why choose PrimeUnits financing?

@@ -24,5 +24,24 @@ return [
         'heavy-equipment' => ['equipment', 'truck'],
         'electric-vehicles' => ['vehicle', 'eBike'],
         'other-units' => ['vehicle', 'truck', 'motorcycle', 'threeWheel', 'eBike', 'equipment', 'farm'],
+        'watercraft-marine-vessels' => [],
+        'aircraft' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Landing Feed Composition
+    |--------------------------------------------------------------------------
+    |
+    | Controls the tier-themes/mobile-landing/listing-feed feature: how many
+    | positions load per "Load 12 More" batch, and the cap on each promotion
+    | type per batch (Featured, Sponsored, Advertisement).
+    |
+    */
+    'feed' => [
+        'batch_size' => 12,
+        'max_featured_per_batch' => 1,
+        'max_sponsored_per_batch' => 1,
+        'max_advertisements_per_batch' => 1,
     ],
 ];

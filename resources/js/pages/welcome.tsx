@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowRight,
     BadgeCheck,
@@ -21,7 +21,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ComponentType, FormEvent, ReactNode } from 'react';
-import { dashboard, login } from '@/routes';
+import { LandingFeed } from '@/components/landing-feed';
+import type { FeedCard } from '@/components/landing-feed';
+import { PublicHeader } from '@/components/public-header';
+import { login } from '@/routes';
 
 type Category = {
     id: number;
@@ -173,8 +176,11 @@ type Props = {
     categoryBrandGroups: Record<string, BrandGroup[]>;
     rentalTypes: RentalTypeOption[];
     marketplaceListings: ListingCard[];
-    featuredListings: ListingCard[];
-    miniListings: ListingCard[];
+    feed: {
+        cards: FeedCard[];
+        cursor: string;
+        has_more: boolean;
+    };
     searchOptions: SearchOptions;
 };
 
@@ -195,12 +201,6 @@ const brandTabs = [
     { key: 'farm', label: 'Farm' },
 ] as const;
 
-const financingMenuItems = [
-    { title: 'Brand New', href: '/financing?type=brand-new' },
-    { title: 'Used Cars', href: '/financing?type=used-cars' },
-    { title: 'Sangla OR/CR', href: '/financing?type=sangla-or-cr' },
-];
-
 type SearchMode = 'buy' | 'rent' | 'browse';
 
 export default function Welcome({
@@ -211,9 +211,9 @@ export default function Welcome({
     categoryBrandGroups,
     rentalTypes,
     marketplaceListings,
+    feed,
     searchOptions,
 }: Props) {
-    const { auth } = usePage().props;
     const [form, setForm] = useState<Filters>(filters);
     const [mode, setMode] = useState<SearchMode>('buy');
     const [rentalType, setRentalType] = useState('');
@@ -357,11 +357,6 @@ export default function Welcome({
     const hasActiveFilters = Object.values(filters).some(
         (value) => value !== '',
     );
-    const marketplaceCards = buildMarketplaceCards(
-        marketplaceListings,
-        ads,
-        !hasActiveFilters,
-    );
     const filteredProvinces = searchOptions.locationOptions.provinces.filter(
         (province) => !form.region || province.region_name === form.region,
     );
@@ -389,80 +384,7 @@ export default function Welcome({
             </Head>
 
             <main className="min-h-screen bg-[#f4f5f2] text-zinc-950">
-                <header className="border-b border-zinc-200 bg-white">
-                    <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-6">
-                        <Link
-                            href="/"
-                            className="flex items-center gap-3 font-semibold"
-                        >
-                            <span className="flex size-10 items-center justify-center rounded-md bg-emerald-600 text-white">
-                                <Truck className="size-5" />
-                            </span>
-                            <span className="text-xl">PrimeUnits</span>
-                        </Link>
-
-                        <nav className="flex items-center gap-1 text-sm">
-                            <Link
-                                href="/seller/apply"
-                                className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
-                            >
-                                Sell
-                            </Link>
-                            <Link
-                                href="/rentals"
-                                className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
-                            >
-                                Rent
-                            </Link>
-                            <Link
-                                href="/insurance"
-                                className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
-                            >
-                                Insurance
-                            </Link>
-                            <div className="group relative hidden md:block">
-                                <Link
-                                    href="/financing"
-                                    className="inline-flex rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100"
-                                >
-                                    Financing
-                                </Link>
-                                <div className="invisible absolute top-full right-0 z-20 w-44 rounded-md border border-zinc-200 bg-white p-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
-                                    {financingMenuItems.map((item) => (
-                                        <Link
-                                            key={item.href}
-                                            href={item.href}
-                                            className="block rounded px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-                                        >
-                                            {item.title}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                            <Link
-                                href="/contact-us"
-                                className="hidden rounded-md px-3 py-2 font-medium text-zinc-700 hover:bg-zinc-100 md:inline-flex"
-                            >
-                                Ask
-                            </Link>
-                            {auth.user ? (
-                                <Link
-                                    href={dashboard()}
-                                    className="rounded-md bg-zinc-950 px-4 py-2 font-semibold text-white"
-                                >
-                                    Dashboard
-                                </Link>
-                            ) : (
-                                <Link
-                                    href={login()}
-                                    className="rounded-md bg-zinc-950 px-4 py-2 font-semibold text-white hover:bg-zinc-800"
-                                >
-                                    Login
-                                </Link>
-                            )}
-                        </nav>
-                    </div>
-                </header>
+                <PublicHeader />
 
                 <section className="relative overflow-hidden border-b border-zinc-200 bg-zinc-950">
                     <img
@@ -471,7 +393,7 @@ export default function Welcome({
                         className="absolute inset-0 h-full w-full object-cover opacity-90"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/88 via-zinc-950/58 to-zinc-950/5" />
-                    <div className="relative mx-auto grid min-h-[560px] max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[1fr_480px] lg:px-6">
+                    <div className="relative mx-auto grid min-h-[560px] max-w-7xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-[1fr_480px] lg:px-6">
                         <div className="flex min-h-[420px] flex-col justify-end py-8 text-white">
                             <p className="mb-3 flex items-center gap-2 text-sm font-medium text-emerald-200">
                                 <BadgeCheck className="size-4" />
@@ -490,7 +412,7 @@ export default function Welcome({
                                 <h2 className="text-lg font-semibold tracking-tight">
                                     {landing.search_title}
                                 </h2>
-                                <Filter className="size-5 text-emerald-700" />
+                                <Filter className="size-5 text-brand-accent-strong" />
                             </div>
 
                             <div
@@ -521,7 +443,7 @@ export default function Welcome({
                                         onClick={() => setMode(tab.key)}
                                         className={`flex h-9 items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition ${
                                             mode === tab.key
-                                                ? 'bg-white text-emerald-700 shadow-sm'
+                                                ? 'bg-white text-brand-accent-strong shadow-sm'
                                                 : 'text-zinc-600 hover:text-zinc-950'
                                         }`}
                                     >
@@ -546,7 +468,7 @@ export default function Welcome({
                                                     event.target.value,
                                                 )
                                             }
-                                            className="h-11 w-full rounded-lg border border-zinc-300 bg-white pr-3 pl-9 text-sm transition outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+                                            className="h-11 w-full rounded-lg border border-zinc-300 bg-white pr-3 pl-9 text-sm transition outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-ring/15"
                                             placeholder={
                                                 mode === 'rent'
                                                     ? 'Van rental, wedding car, self-drive...'
@@ -800,7 +722,7 @@ export default function Welcome({
                                 <div className="flex gap-2 pt-1">
                                     <button
                                         type="submit"
-                                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover"
                                     >
                                         <Search className="size-4" />
                                         {mode === 'rent'
@@ -829,7 +751,7 @@ export default function Welcome({
                     id="results"
                     className="mx-auto max-w-7xl px-4 py-6 lg:px-6"
                 >
-                    <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
                         <aside className="space-y-3">
                             <DiscoveryPanel
                                 title="Vehicles"
@@ -864,28 +786,32 @@ export default function Welcome({
                                 subtitle={
                                     hasActiveFilters
                                         ? landing.results_subtitle
-                                        : '12 latest marketplace picks with one featured listing and one managed ad.'
+                                        : 'Loads in batches of 12, with at most one Featured, one Sponsored, and one Advertisement placement per batch.'
                                 }
                             />
-                            <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {marketplaceCards.map((card) =>
-                                    card.kind === 'ad' ? (
-                                        <MarketplaceAdCard
-                                            key={`ad-${card.ad.id}`}
-                                            ad={card.ad}
+                            {hasActiveFilters ? (
+                                <div className="grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                    {marketplaceListings.map((listing) => (
+                                        <FilteredListingCard
+                                            key={listing.id}
+                                            listing={listing}
                                         />
-                                    ) : (
-                                        <MarketplaceListingCard
-                                            key={`listing-${card.listing.id}`}
-                                            listing={card.listing}
-                                            featured={card.featured}
-                                        />
-                                    ),
-                                )}
-                                {marketplaceCards.length === 0 && (
-                                    <EmptyListings />
-                                )}
-                            </div>
+                                    ))}
+                                    {marketplaceListings.length === 0 && (
+                                        <div className="rounded-md border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-600 sm:col-span-2 lg:col-span-4">
+                                            No listings match this search yet.
+                                            Try adjusting your filters.
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <LandingFeed
+                                    key={feed.cursor}
+                                    initialCards={feed.cards}
+                                    initialCursor={feed.cursor}
+                                    initialHasMore={feed.has_more}
+                                />
+                            )}
                         </div>
                     </div>
                 </section>
@@ -901,7 +827,7 @@ export default function Welcome({
                                     <Link
                                         key={value}
                                         href={`/?max_price=${value}#results`}
-                                        className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 text-sm font-medium hover:border-emerald-600 hover:text-emerald-700"
+                                        className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 text-sm font-medium hover:border-brand-primary hover:text-brand-accent-strong"
                                     >
                                         {label}
                                         <ChevronRight className="size-4" />
@@ -969,7 +895,7 @@ function SelectField({
                 className={`h-10 w-full rounded-md border px-3 text-sm capitalize outline-none ${
                     disabled
                         ? 'cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400'
-                        : 'border-zinc-300 bg-white focus:border-emerald-600'
+                        : 'border-zinc-300 bg-white focus:border-brand-primary'
                 }`}
             >
                 <option value="">{placeholder}</option>
@@ -1001,8 +927,8 @@ function CategoryChip({
             aria-pressed={active}
             className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold whitespace-nowrap transition ${
                 active
-                    ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-emerald-600 hover:text-emerald-700'
+                    ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-brand-primary hover:text-brand-accent-strong'
             }`}
         >
             {icon}
@@ -1041,7 +967,7 @@ function PesoField({
                         onChange(event.target.value.replace(/[^0-9]/g, ''))
                     }
                     placeholder="Any"
-                    className="h-10 w-full rounded-md border border-zinc-300 bg-white pr-3 pl-7 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+                    className="h-10 w-full rounded-md border border-zinc-300 bg-white pr-3 pl-7 text-sm outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-ring/15"
                 />
             </div>
         </label>
@@ -1068,7 +994,7 @@ function DiscoveryPanel({
                     <Link
                         key={item}
                         href={`/?classification=${encodeURIComponent(item)}#results`}
-                        className="rounded-md bg-zinc-100 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700"
+                        className="rounded-md bg-zinc-100 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-brand-surface-muted hover:text-brand-accent-strong"
                     >
                         {item}
                     </Link>
@@ -1101,7 +1027,7 @@ function BrandStrip({
                             onClick={() => onTabChange(tab.key)}
                             className={`h-9 rounded-md px-3 text-sm font-semibold whitespace-nowrap transition ${
                                 activeTab === tab.key
-                                    ? 'bg-white text-emerald-700 shadow-sm'
+                                    ? 'bg-white text-brand-accent-strong shadow-sm'
                                     : 'text-zinc-600 hover:text-zinc-950'
                             }`}
                         >
@@ -1115,7 +1041,7 @@ function BrandStrip({
                     <Link
                         key={brand.name}
                         href={`/?brand=${encodeURIComponent(brand.name)}#results`}
-                        className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border border-zinc-200 px-2 py-3 text-center text-xs font-medium text-zinc-700 hover:border-emerald-600 hover:text-emerald-700"
+                        className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border border-zinc-200 px-2 py-3 text-center text-xs font-medium text-zinc-700 hover:border-brand-primary hover:text-brand-accent-strong"
                     >
                         <img
                             src={brand.logo}
@@ -1143,13 +1069,13 @@ function Footer({
 }) {
     return (
         <footer className="border-t border-zinc-800 bg-zinc-950 text-white">
-            <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:px-6">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:px-6">
                 <div>
                     <Link
                         href="/"
                         className="flex items-center gap-3 font-semibold"
                     >
-                        <span className="flex size-10 items-center justify-center rounded-md bg-emerald-500 text-zinc-950">
+                        <span className="flex size-10 items-center justify-center rounded-md bg-brand-primary text-white">
                             <Truck className="size-5" />
                         </span>
                         <span className="text-xl">PrimeUnits</span>
@@ -1393,7 +1319,7 @@ function SectionHeading({
             </div>
             <Link
                 href="/#results"
-                className="hidden text-sm font-medium text-emerald-700 sm:inline-flex"
+                className="hidden text-sm font-medium text-brand-accent-strong sm:inline-flex"
             >
                 View all
             </Link>
@@ -1401,46 +1327,18 @@ function SectionHeading({
     );
 }
 
-type MarketplaceCard =
-    | { kind: 'listing'; listing: ListingCard; featured: boolean }
-    | { kind: 'ad'; ad: LandingAd };
-
-function buildMarketplaceCards(
-    listings: ListingCard[],
-    ads: LandingAd[],
-    includeAd: boolean,
-): MarketplaceCard[] {
-    const cards: MarketplaceCard[] = listings
-        .slice(0, 11)
-        .map((listing, index) => ({
-            kind: 'listing',
-            listing,
-            featured: index === 0,
-        }));
-
-    if (includeAd && ads.length > 0) {
-        cards.splice(Math.min(4, cards.length), 0, {
-            kind: 'ad',
-            ad: ads[0],
-        });
-    }
-
-    return cards.slice(0, 12);
-}
-
-function MarketplaceListingCard({
-    listing,
-    featured,
-}: {
-    listing: ListingCard;
-    featured: boolean;
-}) {
+function FilteredListingCard({ listing }: { listing: ListingCard }) {
     return (
         <Link href={`/listings/${listing.id}`} className="group block">
             <div className="relative overflow-hidden rounded-md bg-zinc-100">
-                <MarketplaceImage listing={listing} />
-                {featured && (
-                    <span className="absolute top-2 left-2 rounded bg-white/95 px-2 py-1 text-xs font-semibold text-emerald-700 shadow-sm">
+                <img
+                    src={listing.image_url}
+                    alt={listing.title}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+                />
+                {listing.is_featured && (
+                    <span className="absolute top-2 left-2 rounded bg-white/95 px-2 py-1 text-xs font-semibold text-brand-accent-strong shadow-sm">
                         Featured
                     </span>
                 )}
@@ -1460,71 +1358,5 @@ function MarketplaceListingCard({
                 </p>
             </div>
         </Link>
-    );
-}
-
-function MarketplaceAdCard({ ad }: { ad: LandingAd }) {
-    return (
-        <article className="block">
-            <div className="relative overflow-hidden rounded-md bg-zinc-100">
-                {ad.image_url ? (
-                    <img
-                        src={ad.image_url}
-                        alt={ad.title}
-                        className="h-[180px] w-full object-cover"
-                    />
-                ) : (
-                    <div className="flex h-[180px] items-center justify-center bg-zinc-100 text-sm text-zinc-500">
-                        Photo coming soon
-                    </div>
-                )}
-                <span
-                    className="absolute top-2 left-2 rounded px-2 py-1 text-xs font-semibold text-white shadow-sm"
-                    style={{ backgroundColor: ad.accent_color }}
-                >
-                    Ad
-                </span>
-            </div>
-            <div className="pt-2">
-                <p className="text-base font-semibold text-zinc-950">
-                    {ad.title}
-                </p>
-                <p className="mt-0.5 line-clamp-2 min-h-10 text-sm leading-5 text-zinc-800">
-                    {ad.body}
-                </p>
-                <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="truncate text-xs text-zinc-500">
-                        {ad.category}
-                    </p>
-                    {ad.cta_label && ad.cta_url && (
-                        <Link
-                            href={ad.cta_url}
-                            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-                        >
-                            {ad.cta_label}
-                        </Link>
-                    )}
-                </div>
-            </div>
-        </article>
-    );
-}
-
-function MarketplaceImage({ listing }: { listing: ListingCard }) {
-    return (
-        <img
-            src={listing.image_url}
-            alt={listing.title}
-            className="h-[180px] w-full object-cover transition duration-200 group-hover:scale-[1.02]"
-        />
-    );
-}
-
-function EmptyListings() {
-    return (
-        <div className="rounded-md border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-600 sm:col-span-2 lg:col-span-4">
-            No listings match this location yet. Try another city, province, or
-            region.
-        </div>
     );
 }

@@ -202,7 +202,7 @@ export default function Insurance({ companies }: Props) {
                 </header>
 
                 <section className="bg-white">
-                    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_380px] lg:px-6">
+                    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-[1fr_380px] lg:px-6">
                         <div className="flex flex-col justify-center">
                             <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
                                 <ShieldCheck className="size-4" />

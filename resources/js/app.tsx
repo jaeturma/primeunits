@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -52,3 +52,18 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Keeps the tier-theme attribute in sync with the server-authorized
+// marketplace mode on every SPA navigation (e.g. after switching mode in
+// settings). The mode itself is never trusted from the client — this only
+// mirrors what HandleMarketplaceMode already resolved server-side onto
+// <html data-marketplace-mode>, which app.blade.php also sets on first
+// paint to avoid a flash of the wrong theme.
+router.on('navigate', (event) => {
+    const mode = (event.detail.page.props as { marketplaceMode?: string })
+        .marketplaceMode;
+
+    if (mode && typeof document !== 'undefined') {
+        document.documentElement.dataset.marketplaceMode = mode;
+    }
+});

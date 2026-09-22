@@ -3,13 +3,14 @@
 namespace App\Http\Requests;
 
 use App\Models\Category;
+use App\Models\CategoryAccessRule;
 use App\Models\CategorySpecField;
 use App\Models\Listing;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use Illuminate\Http\UploadedFile;
 
 class StoreListingRequest extends FormRequest
 {
@@ -58,6 +59,18 @@ class StoreListingRequest extends FormRequest
             'attachments.*' => ['file', 'mimes:pdf', 'max:5120'],
             'valid_id_file' => [Rule::requiredIf(fn (): bool => ! $this->hasApprovedBusinessProfile()), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'or_cr_file' => [Rule::requiredIf(fn (): bool => ! $this->hasApprovedBusinessProfile()), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'seller_capacity' => ['nullable', Rule::in([
+                Listing::CapacityPrivateOwner,
+                Listing::CapacityAuthorizedDealer,
+                Listing::CapacityIndependentBroker,
+                Listing::CapacityBrokerageCompany,
+                Listing::CapacityCharterOperator,
+                Listing::CapacityFleetOrCorporateOwner,
+                Listing::CapacityManufacturerOrDistributor,
+            ])],
+            'is_gold_candidate' => ['boolean'],
+            'price_on_request' => ['boolean'],
+            'registration_number' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -69,6 +82,16 @@ class StoreListingRequest extends FormRequest
 
                 if (! $categoryId) {
                     return;
+                }
+
+                $rule = CategoryAccessRule::query()->where('category_id', $categoryId)->first();
+
+                if ($rule !== null && $rule->min_seller_access !== 'regular') {
+                    $access = $this->user()->membershipAccess;
+
+                    if (! $access?->hasSellerAccessAtLeast($rule->min_seller_access)) {
+                        $validator->errors()->add('category_id', "Selling in this category requires {$rule->min_seller_access} seller authorization. Apply for an upgrade first.");
+                    }
                 }
 
                 $fields = CategorySpecField::query()
@@ -115,6 +138,7 @@ class StoreListingRequest extends FormRequest
         return collect(['valid_id_file', 'or_cr_file'])
             ->mapWithKeys(function (string $field): array {
                 $file = $this->file($field);
+
                 return $file instanceof UploadedFile ? [$field => $file->store('listings/identity', 'public')] : [];
             })->all();
     }
@@ -122,6 +146,7 @@ class StoreListingRequest extends FormRequest
     private function hasApprovedBusinessProfile(): bool
     {
         $user = $this->user();
+
         return $user?->sellerProfile?->isVerified() === true || $user?->dealerProfile?->isVerified() === true;
     }
 

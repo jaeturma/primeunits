@@ -55,4 +55,14 @@ class ListingPolicy
     {
         return $user->id !== $listing->user_id;
     }
+
+    public function manageTier(User $user, Listing $listing): bool
+    {
+        return $user->hasPermission('review_premium_listings');
+    }
+
+    public function reviewGoldCandidate(User $user, Listing $listing): bool
+    {
+        return $user->hasPermission('review_gold_listings');
+    }
 }

@@ -26,7 +26,8 @@ class StorePlanRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', Rule::in([Plan::TypeBoost, Plan::TypeSubscription])],
+            'type' => ['required', Rule::in([Plan::TypeBoost, Plan::TypeSubscription, Plan::TypeMembership])],
+            'tier' => ['nullable', Rule::in([Plan::TierRegular, Plan::TierSilver, Plan::TierGold])],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'duration_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
             'features' => ['nullable', 'array'],

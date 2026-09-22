@@ -14,7 +14,22 @@ type LandingAd = {
     accent_color: string;
     sort_order: number;
     is_active: boolean;
+    show_in_feed: boolean;
+    starts_at: string | null;
+    ends_at: string | null;
+    target_marketplace_mode: string | null;
+    review_status: 'pending' | 'approved' | 'rejected';
+    impressions_count: number;
+    clicks_count: number;
 };
+
+function toDatetimeLocal(value: string | null): string {
+    if (!value) {
+        return '';
+    }
+
+    return value.slice(0, 16);
+}
 
 export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
     const [editing, setEditing] = useState<LandingAd | null>(null);
@@ -31,6 +46,11 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
         accent_color: '#059669',
         sort_order: '0',
         is_active: true,
+        show_in_feed: false,
+        starts_at: '',
+        ends_at: '',
+        target_marketplace_mode: '',
+        review_status: 'approved' as 'pending' | 'approved' | 'rejected',
     });
 
     function load(ad: LandingAd) {
@@ -47,6 +67,11 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
             accent_color: ad.accent_color,
             sort_order: ad.sort_order.toString(),
             is_active: ad.is_active,
+            show_in_feed: ad.show_in_feed,
+            starts_at: toDatetimeLocal(ad.starts_at),
+            ends_at: toDatetimeLocal(ad.ends_at),
+            target_marketplace_mode: ad.target_marketplace_mode ?? '',
+            review_status: ad.review_status,
         });
         setImagePreview(ad.image_url);
     }
@@ -62,6 +87,7 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
 
         if (file) {
             setImagePreview(URL.createObjectURL(file));
+
             return;
         }
 
@@ -77,6 +103,7 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
                 preserveScroll: true,
                 onSuccess: clear,
             });
+
             return;
         }
 
@@ -155,6 +182,7 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
                             value={data.image_url}
                             onChange={(event) => {
                                 setData('image_url', event.target.value);
+
                                 if (!data.image_file) {
                                     setImagePreview(event.target.value || null);
                                 }
@@ -202,16 +230,95 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
                             />
                         </Field>
                     </div>
-                    <label className="flex items-center gap-2 text-sm">
-                        <input
-                            type="checkbox"
-                            checked={data.is_active}
-                            onChange={(event) =>
-                                setData('is_active', event.target.checked)
-                            }
-                        />
-                        Active
-                    </label>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                checked={data.is_active}
+                                onChange={(event) =>
+                                    setData('is_active', event.target.checked)
+                                }
+                            />
+                            Active
+                        </label>
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                checked={data.show_in_feed}
+                                onChange={(event) =>
+                                    setData(
+                                        'show_in_feed',
+                                        event.target.checked,
+                                    )
+                                }
+                            />
+                            Eligible for landing feed
+                        </label>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Starts" error={errors.starts_at}>
+                            <input
+                                type="datetime-local"
+                                value={data.starts_at}
+                                onChange={(event) =>
+                                    setData('starts_at', event.target.value)
+                                }
+                                className="h-10 rounded-md border bg-background px-3"
+                            />
+                        </Field>
+                        <Field label="Ends" error={errors.ends_at}>
+                            <input
+                                type="datetime-local"
+                                value={data.ends_at}
+                                onChange={(event) =>
+                                    setData('ends_at', event.target.value)
+                                }
+                                className="h-10 rounded-md border bg-background px-3"
+                            />
+                        </Field>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field
+                            label="Target marketplace mode"
+                            error={errors.target_marketplace_mode}
+                        >
+                            <select
+                                value={data.target_marketplace_mode}
+                                onChange={(event) =>
+                                    setData(
+                                        'target_marketplace_mode',
+                                        event.target.value,
+                                    )
+                                }
+                                className="h-10 rounded-md border bg-background px-3"
+                            >
+                                <option value="">All modes</option>
+                                <option value="regular">Regular</option>
+                                <option value="silver">Silver</option>
+                                <option value="gold">Gold</option>
+                            </select>
+                        </Field>
+                        <Field
+                            label="Review status"
+                            error={errors.review_status}
+                        >
+                            <select
+                                value={data.review_status}
+                                onChange={(event) =>
+                                    setData(
+                                        'review_status',
+                                        event.target
+                                            .value as typeof data.review_status,
+                                    )
+                                }
+                                className="h-10 rounded-md border bg-background px-3"
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </Field>
+                    </div>
                     <div className="flex gap-2">
                         <button
                             disabled={processing}
@@ -261,11 +368,28 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
                                                 {ad.body}
                                             </p>
                                         </div>
-                                        <Badge variant="secondary">
-                                            {ad.is_active
-                                                ? 'active'
-                                                : 'inactive'}
-                                        </Badge>
+                                        <div className="flex flex-wrap gap-1">
+                                            <Badge variant="secondary">
+                                                {ad.is_active
+                                                    ? 'active'
+                                                    : 'inactive'}
+                                            </Badge>
+                                            <Badge
+                                                variant={
+                                                    ad.review_status ===
+                                                    'approved'
+                                                        ? 'secondary'
+                                                        : 'outline'
+                                                }
+                                            >
+                                                {ad.review_status}
+                                            </Badge>
+                                            {ad.show_in_feed && (
+                                                <Badge variant="outline">
+                                                    in feed
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
                                         <span className="rounded-md border px-2 py-1">
@@ -276,6 +400,16 @@ export default function AdminLandingAds({ ads }: { ads: LandingAd[] }) {
                                             style={{ color: ad.accent_color }}
                                         >
                                             {ad.accent_color}
+                                        </span>
+                                        {ad.target_marketplace_mode && (
+                                            <span className="rounded-md border px-2 py-1 capitalize">
+                                                {ad.target_marketplace_mode}{' '}
+                                                only
+                                            </span>
+                                        )}
+                                        <span className="rounded-md border px-2 py-1">
+                                            {ad.impressions_count} views /{' '}
+                                            {ad.clicks_count} clicks
                                         </span>
                                     </div>
                                     <div className="mt-3 flex gap-2">

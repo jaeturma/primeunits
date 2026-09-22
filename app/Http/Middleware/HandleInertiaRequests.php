@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\MembershipAccess;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +43,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'marketplaceMode' => $request->attributes->get('marketplace_mode', MembershipAccess::LevelRegular),
             'auth' => [
                 'user' => $user,
                 'roles' => $user?->roles->pluck('name')->values()->all() ?? [],

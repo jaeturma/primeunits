@@ -5,6 +5,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            marketplaceMode: 'regular' | 'silver' | 'gold';
             flash: {
                 inquiry?: {
                     reference_code: string;

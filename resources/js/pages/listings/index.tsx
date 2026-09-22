@@ -232,7 +232,7 @@ export default function PublicListings({
                     </button>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
                     <aside
                         className={`${filtersOpen ? 'block' : 'hidden'} rounded-lg border bg-card p-4 lg:block`}
                     >

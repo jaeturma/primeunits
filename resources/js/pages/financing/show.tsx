@@ -96,7 +96,7 @@ export default function FinancingShow({ partner }: { partner: Partner }) {
                     </Link>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
                     <div className="space-y-6">
                         {partner.description && (
                             <section className="rounded-lg border p-5">

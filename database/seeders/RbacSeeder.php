@@ -53,6 +53,16 @@ class RbacSeeder extends Seeder
             'view_drone_credential_documents' => 'View Private Drone Credential Documents',
             'manage_drone_compliance' => 'Manage Drone Compliance Notices and Requirements',
             'suspend_drone_listings' => 'Suspend Noncompliant Drone Listings',
+            'manage_memberships' => 'Manage Membership Plans and Statuses',
+            'review_membership_applications' => 'Review Membership Applications',
+            'review_buyer_access' => 'Review Buyer Access Applications',
+            'review_seller_access' => 'Review Seller Access Applications',
+            'review_stores' => 'Review Store Applications',
+            'review_premium_listings' => 'Assign Listing Marketplace Tier and Visibility',
+            'review_gold_listings' => 'Review Gold Candidate Listings',
+            'view_confidential_documents' => 'View Private Membership Application Documents',
+            'manage_listing_access' => 'Manage Invitation-Only Listing Access',
+            'manage_category_tier_rules' => 'Configure Category Marketplace Tier Rules',
         ])->map(fn (string $label, string $name): Permission => Permission::query()->updateOrCreate(
             ['name' => $name],
             ['label' => $label],
@@ -82,6 +92,16 @@ class RbacSeeder extends Seeder
             $permissions->get('view_drone_credential_documents')?->id,
             $permissions->get('manage_drone_compliance')?->id,
             $permissions->get('suspend_drone_listings')?->id,
+            $permissions->get('manage_memberships')?->id,
+            $permissions->get('review_membership_applications')?->id,
+            $permissions->get('review_buyer_access')?->id,
+            $permissions->get('review_seller_access')?->id,
+            $permissions->get('review_stores')?->id,
+            $permissions->get('review_premium_listings')?->id,
+            $permissions->get('review_gold_listings')?->id,
+            $permissions->get('view_confidential_documents')?->id,
+            $permissions->get('manage_listing_access')?->id,
+            $permissions->get('manage_category_tier_rules')?->id,
         ]);
         $roles->get('admin')?->permissions()->syncWithoutDetaching($adminPerms);
 
@@ -101,12 +121,25 @@ class RbacSeeder extends Seeder
             $permissions->get('view_drone_credential_documents')?->id,
             $permissions->get('manage_drone_compliance')?->id,
             $permissions->get('suspend_drone_listings')?->id,
+            $permissions->get('manage_memberships')?->id,
+            $permissions->get('review_membership_applications')?->id,
+            $permissions->get('review_buyer_access')?->id,
+            $permissions->get('review_seller_access')?->id,
+            $permissions->get('review_stores')?->id,
+            $permissions->get('review_premium_listings')?->id,
+            $permissions->get('review_gold_listings')?->id,
+            $permissions->get('view_confidential_documents')?->id,
+            $permissions->get('manage_listing_access')?->id,
+            $permissions->get('manage_category_tier_rules')?->id,
         ]));
 
         $roles->get('coordinator')?->permissions()->syncWithoutDetaching(array_filter([
             $permissions->get('approve_listings')?->id,
             $permissions->get('manage_rentals')?->id,
             $permissions->get('review_drone_credentials')?->id,
+            $permissions->get('review_membership_applications')?->id,
+            $permissions->get('review_buyer_access')?->id,
+            $permissions->get('review_seller_access')?->id,
         ]));
 
         $roles->get('insurance_manager')?->permissions()->syncWithoutDetaching(array_filter([

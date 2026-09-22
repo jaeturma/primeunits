@@ -25,8 +25,7 @@ test('home landing page exposes marketplace search data and listing sections', f
             'props' => [
                 'categories',
                 'marketplaceListings',
-                'featuredListings',
-                'miniListings',
+                'feed' => ['cards', 'cursor', 'has_more'],
                 'searchOptions' => [
                     'brandGroups' => ['vehicle', 'truck', 'motorcycle', 'threeWheel', 'eBike', 'equipment', 'farm'],
                     'vehicleTypes',
@@ -52,8 +51,7 @@ test('home landing page exposes marketplace search data and listing sections', f
         ->and($props['searchOptions']['locationOptions']['municipalities'])->not->toBeEmpty()
         ->and(collect($props['searchOptions']['locationOptions']['municipalities'])->pluck('name'))->toContain('City of Mandaue')
         ->and($props['marketplaceListings'])->not->toBeEmpty()
-        ->and($props['featuredListings'])->not->toBeEmpty()
-        ->and($props['featuredListings'][0]['image_url'])->toMatch('#^/images/vehicles/[a-z-]+\.svg$#');
+        ->and($props['feed']['cards'])->not->toBeEmpty();
 });
 
 test('home landing page loads a marketplace-style twelve card feed', function () {
@@ -65,12 +63,20 @@ test('home landing page loads a marketplace-style twelve card feed', function ()
     ]);
 
     $response->assertOk()
-        ->assertJsonCount(11, 'props.marketplaceListings')
+        ->assertJsonCount(12, 'props.marketplaceListings')
+        ->assertJsonCount(12, 'props.feed.cards')
         ->assertJsonCount(7, 'props.ads')
         ->assertJsonStructure([
             'props' => [
                 'marketplaceListings' => [
                     '*' => ['id', 'title', 'description', 'price', 'municipality', 'province', 'image_url'],
+                ],
+                'feed' => [
+                    'cards' => [
+                        '*' => ['type', 'listing', 'ad'],
+                    ],
+                    'cursor',
+                    'has_more',
                 ],
             ],
         ]);

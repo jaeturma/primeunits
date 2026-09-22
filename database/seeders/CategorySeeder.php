@@ -12,7 +12,7 @@ class CategorySeeder extends Seeder
         $fuelTypes = ['Gasoline', 'Diesel', 'LPG', 'BEV', 'HEV', 'PHEV', 'eREV', 'FCEV'];
         $transmissions = ['Manual', 'Automatic', 'CVT', 'DCT', 'Semi-Automatic'];
         $colors = ['White', 'Black', 'Silver', 'Gray', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Brown', 'Gold', 'Other'];
-        $bodyTypes = ['Sedan', 'SUV', 'Hatchback', 'MPV', 'Van', 'Pickup', 'Convertible', 'Coupe', 'Crossover', 'Wagon'];
+        $bodyTypes = ['Sedan', 'SUV', 'Hatchback', 'MPV', 'Van', 'Pickup', 'Convertible', 'Coupe', 'Crossover', 'Wagon', 'Sports Car', 'Exotic', 'Armored & Security Vehicle'];
         $driveTypes = ['FWD', 'RWD', 'AWD', '4WD'];
         $engineSizes = ['660cc', '1.0L', '1.3L', '1.5L', '1.6L', '1.8L', '2.0L', '2.4L', '2.5L', '3.0L', '3.5L', '4.0L', '5.0L', 'Other'];
 
@@ -50,7 +50,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
                 'commission_rate' => 2.00,
                 'fields' => [
-                    ['name' => 'motorcycle_type', 'label' => 'Motorcycle Type', 'type' => 'select', 'options' => ['Sports', 'Adventure / Touring', 'Big Bike', 'Naked / Street', 'Scooter', 'Underbone', 'Moto3 / Mini Bike', 'Electric Motorcycle', 'Sidecar', 'Other'], 'required' => true, 'sort_order' => 1, 'is_searchable' => true, 'is_classification' => true],
+                    ['name' => 'motorcycle_type', 'label' => 'Motorcycle Type', 'type' => 'select', 'options' => ['Sports', 'Adventure / Touring', 'Big Bike', 'Naked / Street', 'Scooter', 'Underbone', 'Moto3 / Mini Bike', 'Electric Motorcycle', 'Sidecar', 'Premium Custom Motorcycle', 'Collector Chopper', 'Other'], 'required' => true, 'sort_order' => 1, 'is_searchable' => true, 'is_classification' => true],
                     ['name' => 'fuel_type', 'label' => 'Fuel Type', 'type' => 'select', 'options' => ['Gasoline', 'BEV', 'HEV', 'PHEV', 'eREV', 'FCEV'], 'required' => true, 'sort_order' => 2, 'is_searchable' => true],
                     ['name' => 'displacement', 'label' => 'Displacement (cc)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 3, 'is_searchable' => false],
                     ['name' => 'mileage', 'label' => 'Mileage (km)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 4, 'is_searchable' => true],
@@ -169,6 +169,48 @@ class CategorySeeder extends Seeder
                     ['name' => 'capacity', 'label' => 'Capacity', 'type' => 'text', 'options' => null, 'required' => false, 'sort_order' => 4, 'is_searchable' => false],
                     ['name' => 'dimensions', 'label' => 'Dimensions (LxWxH)', 'type' => 'text', 'options' => null, 'required' => false, 'sort_order' => 5, 'is_searchable' => false],
                     ['name' => 'usage_hours', 'label' => 'Usage Hours', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 6, 'is_searchable' => false],
+                ],
+            ],
+
+            // ───── WATERCRAFT & MARINE VESSELS (Silver baseline, Gold on approval) ─────
+            [
+                'name' => 'Watercraft & Marine Vessels',
+                'slug' => 'watercraft-marine-vessels',
+                'icon' => 'anchor',
+                'sort_order' => 8,
+                'is_active' => true,
+                'commission_rate' => 2.00,
+                'fields' => [
+                    ['name' => 'vessel_type', 'label' => 'Vessel Type', 'type' => 'select', 'options' => ['Personal Watercraft (Jet Skis)', 'Day Boat / Speedboat', 'Sailing Yacht', 'Motor Yacht', 'Superyacht', 'Large Leisure Vessel', 'Commercial Vessel'], 'required' => true, 'sort_order' => 1, 'is_searchable' => true, 'is_classification' => true],
+                    ['name' => 'length_overall_m', 'label' => 'Length Overall (m)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 2, 'is_searchable' => true],
+                    ['name' => 'beam_m', 'label' => 'Beam (m)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 3, 'is_searchable' => false],
+                    ['name' => 'draft_m', 'label' => 'Draft (m)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 4, 'is_searchable' => false],
+                    ['name' => 'gross_tonnage', 'label' => 'Gross Tonnage', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 5, 'is_searchable' => false],
+                    ['name' => 'passenger_capacity', 'label' => 'Passenger Capacity', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 6, 'is_searchable' => false],
+                    ['name' => 'cabin_count', 'label' => 'Cabin Count', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 7, 'is_searchable' => false],
+                    ['name' => 'crew_capacity', 'label' => 'Crew Capacity', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 8, 'is_searchable' => false],
+                    ['name' => 'hull_type', 'label' => 'Hull Type', 'type' => 'select', 'options' => ['Monohull', 'Catamaran', 'Trimaran', 'Planing', 'Displacement', 'Other'], 'required' => false, 'sort_order' => 9, 'is_searchable' => false],
+                    ['name' => 'vessel_use', 'label' => 'Vessel Use', 'type' => 'select', 'options' => ['Recreational', 'Charter', 'Commercial'], 'required' => false, 'sort_order' => 10, 'is_searchable' => true],
+                    ['name' => 'flag_jurisdiction', 'label' => 'Flag / Jurisdiction', 'type' => 'text', 'options' => null, 'required' => false, 'sort_order' => 11, 'is_searchable' => false],
+                ],
+            ],
+
+            // ───── AIRCRAFT (Gold: private, professionally reviewed marketplace) ─────
+            [
+                'name' => 'Aircraft',
+                'slug' => 'aircraft',
+                'icon' => 'plane',
+                'sort_order' => 9,
+                'is_active' => true,
+                'commission_rate' => 2.00,
+                'fields' => [
+                    ['name' => 'aircraft_type', 'label' => 'Aircraft Type', 'type' => 'select', 'options' => ['Light Aircraft', 'Turboprop Aircraft', 'Private Jet', 'Helicopter'], 'required' => true, 'sort_order' => 1, 'is_searchable' => true, 'is_classification' => true],
+                    ['name' => 'total_time_hours', 'label' => 'Total Time (hours)', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 2, 'is_searchable' => false],
+                    ['name' => 'total_cycles', 'label' => 'Total Cycles', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 3, 'is_searchable' => false],
+                    ['name' => 'engine_hours', 'label' => 'Engine Hours Since Overhaul', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 4, 'is_searchable' => false],
+                    ['name' => 'seating_capacity', 'label' => 'Seating Capacity', 'type' => 'number', 'options' => null, 'required' => false, 'sort_order' => 5, 'is_searchable' => false],
+                    ['name' => 'airworthiness_status', 'label' => 'Airworthiness Status', 'type' => 'select', 'options' => ['Current', 'Due for Inspection', 'Not Currently Airworthy'], 'required' => false, 'sort_order' => 6, 'is_searchable' => false],
+                    ['name' => 'home_base', 'label' => 'Home Base / Registration Country', 'type' => 'text', 'options' => null, 'required' => false, 'sort_order' => 7, 'is_searchable' => false],
                 ],
             ],
         ];

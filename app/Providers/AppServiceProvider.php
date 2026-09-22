@@ -7,6 +7,8 @@ use App\Models\DronePilotCredential;
 use App\Models\FinancingApplication;
 use App\Models\Lead;
 use App\Models\Listing;
+use App\Models\ListingAccessRequest;
+use App\Models\MembershipApplication;
 use App\Models\RentalUnit;
 use App\Models\SellerProfile;
 use App\Models\Transaction;
@@ -14,7 +16,9 @@ use App\Policies\DealerProfilePolicy;
 use App\Policies\DronePilotCredentialPolicy;
 use App\Policies\FinancingApplicationPolicy;
 use App\Policies\LeadPolicy;
+use App\Policies\ListingAccessRequestPolicy;
 use App\Policies\ListingPolicy;
+use App\Policies\MembershipApplicationPolicy;
 use App\Policies\RentalUnitPolicy;
 use App\Policies\SellerProfilePolicy;
 use App\Policies\TransactionPolicy;
@@ -54,6 +58,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RentalUnit::class, RentalUnitPolicy::class);
         Gate::policy(FinancingApplication::class, FinancingApplicationPolicy::class);
         Gate::policy(DronePilotCredential::class, DronePilotCredentialPolicy::class);
+        Gate::policy(MembershipApplication::class, MembershipApplicationPolicy::class);
+        Gate::policy(ListingAccessRequest::class, ListingAccessRequestPolicy::class);
     }
 
     /**

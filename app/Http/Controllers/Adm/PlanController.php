@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Adm;
 
-use App\Http\Requests\StorePlanRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePlanRequest;
 use App\Models\Plan;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,6 +21,7 @@ class PlanController extends Controller
                     'id' => $plan->id,
                     'name' => $plan->name,
                     'type' => $plan->type,
+                    'tier' => $plan->tier,
                     'price' => $plan->price,
                     'duration_days' => $plan->duration_days,
                     'features' => $plan->features ?? [],
@@ -30,6 +30,12 @@ class PlanController extends Controller
             'types' => [
                 ['value' => Plan::TypeBoost, 'label' => 'Boost'],
                 ['value' => Plan::TypeSubscription, 'label' => 'Subscription'],
+                ['value' => Plan::TypeMembership, 'label' => 'Membership'],
+            ],
+            'tiers' => [
+                ['value' => Plan::TierRegular, 'label' => 'Regular'],
+                ['value' => Plan::TierSilver, 'label' => 'Silver'],
+                ['value' => Plan::TierGold, 'label' => 'Gold'],
             ],
         ]);
     }

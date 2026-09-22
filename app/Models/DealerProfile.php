@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'verified_at',
     'rejected_reason',
     'manager_validated_by', 'manager_validated_at', 'approved_by',
+    'store_tier', 'store_tier_status', 'store_tier_notes',
 ])]
 class DealerProfile extends Model
 {
@@ -41,6 +42,20 @@ class DealerProfile extends Model
     public const StatusManagerValidated = 'manager_validated';
 
     public const StatusRejected = 'rejected';
+
+    public const StoreTierRegular = 'regular';
+
+    public const StoreTierSilver = 'silver';
+
+    public const StoreTierGoldProfessional = 'gold_professional';
+
+    public const StoreTierStatusPending = 'pending';
+
+    public const StoreTierStatusActive = 'active';
+
+    public const StoreTierStatusSuspended = 'suspended';
+
+    public const StoreTierStatusRejected = 'rejected';
 
     /**
      * @return BelongsTo<User, $this>
@@ -69,6 +84,17 @@ class DealerProfile extends Model
     public function isVerified(): bool
     {
         return $this->status === self::StatusVerified;
+    }
+
+    public function hasActiveStoreTierAtLeast(string $tier): bool
+    {
+        if ($this->store_tier_status !== self::StoreTierStatusActive) {
+            return false;
+        }
+
+        $rank = [self::StoreTierRegular => 1, self::StoreTierSilver => 2, self::StoreTierGoldProfessional => 3];
+
+        return ($rank[$this->store_tier] ?? 0) >= ($rank[$tier] ?? 0);
     }
 
     public function statusLabel(): string

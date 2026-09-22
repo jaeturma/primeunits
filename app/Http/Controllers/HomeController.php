@@ -8,10 +8,13 @@ use App\Models\CategorySpecField;
 use App\Models\LandingAd;
 use App\Models\LandingPage;
 use App\Models\Listing;
+use App\Models\MembershipAccess;
 use App\Models\Municipality;
 use App\Models\Province;
 use App\Models\Region;
 use App\Models\RentalUnit;
+use App\Services\FeedCompositionService;
+use App\Support\FeedCursor;
 use App\Support\ResolvesListingStockImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -23,30 +26,17 @@ class HomeController extends Controller
 {
     use ResolvesListingStockImage;
 
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, FeedCompositionService $feed): Response
     {
         $baseListings = $this->approvedListings($request);
 
         $marketplaceListings = (clone $baseListings)
-            ->limit(11)
+            ->limit(12)
             ->get()
             ->map(fn (Listing $listing): array => $this->serializeCard($listing));
 
-        $featuredListings = (clone $baseListings)
-            ->limit(8)
-            ->get()
-            ->map(fn (Listing $listing): array => $this->serializeCard($listing));
-
-        $miniListings = (clone $baseListings)
-            ->offset(8)
-            ->limit(6)
-            ->get();
-
-        if ($miniListings->count() < 6) {
-            $miniListings = $this->approvedListings($request)
-                ->limit(6)
-                ->get();
-        }
+        $mode = $request->user()?->membershipAccess?->effectiveMode() ?? MembershipAccess::LevelRegular;
+        $firstBatch = $feed->compose($request->user(), $mode, [], []);
 
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),
@@ -87,8 +77,15 @@ class HomeController extends Controller
                 ->map(fn (string $label, string $value): array => ['value' => $value, 'label' => $label])
                 ->values(),
             'marketplaceListings' => $marketplaceListings,
-            'featuredListings' => $featuredListings,
-            'miniListings' => $miniListings->map(fn (Listing $listing): array => $this->serializeCard($listing)),
+            'feed' => [
+                'cards' => collect($firstBatch['cards'])->map(fn (array $card): array => [
+                    'type' => $card['type'],
+                    'listing' => $card['listing'] instanceof Listing ? $this->serializeFeedListingCard($card['listing']) : null,
+                    'ad' => $card['ad'] instanceof LandingAd ? $this->serializeFeedAd($card['ad']) : null,
+                ])->values(),
+                'cursor' => FeedCursor::encode($mode, $firstBatch['shown_listing_ids'], $firstBatch['shown_ad_ids']),
+                'has_more' => $firstBatch['has_more'],
+            ],
             'searchOptions' => $this->searchOptions(),
         ]);
     }
@@ -148,6 +145,7 @@ class HomeController extends Controller
                     ->with('specField:id,name,is_classification'),
             ])
             ->where('status', Listing::StatusApproved)
+            ->visibleTo($request->user())
             ->withExists(['boosts as has_active_boost' => fn ($query) => $query
                 ->where('is_active', true)
                 ->where('ends_at', '>', now())])

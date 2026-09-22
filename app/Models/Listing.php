@@ -37,9 +37,46 @@ use Illuminate\Support\Str;
     'expires_at',
     'views_count',
     'agent_validated_by', 'agent_validated_at', 'manager_accepted_by', 'manager_accepted_at', 'approved_by', 'valid_id_file', 'or_cr_file',
+    'marketplace_tier', 'visibility_level', 'seller_capacity', 'is_gold_candidate',
+    'confidentiality_required', 'public_preview_summary', 'registration_number', 'price_on_request',
+    'promoted_until',
 ])]
 class Listing extends Model
 {
+    public const TierRegular = 'regular';
+
+    public const TierSilver = 'silver';
+
+    public const TierGold = 'gold';
+
+    public const TierGoldEnterprise = 'gold_enterprise';
+
+    public const VisibilityPublic = 'public';
+
+    public const VisibilityPublicPreview = 'public_preview';
+
+    public const VisibilitySilverExclusive = 'silver_exclusive';
+
+    public const VisibilityGoldExclusive = 'gold_exclusive';
+
+    public const VisibilityVerifiedBuyerOnly = 'verified_buyer_only';
+
+    public const VisibilityInvitationOnly = 'invitation_only';
+
+    public const CapacityPrivateOwner = 'private_owner';
+
+    public const CapacityAuthorizedDealer = 'authorized_dealer';
+
+    public const CapacityIndependentBroker = 'independent_broker';
+
+    public const CapacityBrokerageCompany = 'brokerage_company';
+
+    public const CapacityCharterOperator = 'charter_operator';
+
+    public const CapacityFleetOrCorporateOwner = 'fleet_or_corporate_owner';
+
+    public const CapacityManufacturerOrDistributor = 'manufacturer_or_distributor';
+
     public const StatusPending = 'pending';
 
     public const StatusAgentValidated = 'agent_validated';
@@ -173,9 +210,61 @@ class Listing extends Model
         return $this->hasMany(ListingReport::class);
     }
 
+    /**
+     * @return HasMany<ListingAccessRequest, $this>
+     */
+    public function accessRequests(): HasMany
+    {
+        return $this->hasMany(ListingAccessRequest::class);
+    }
+
     public function isApproved(): bool
     {
         return $this->status === self::StatusApproved;
+    }
+
+    public function isRestrictedVisibility(): bool
+    {
+        return in_array($this->visibility_level, [
+            self::VisibilitySilverExclusive,
+            self::VisibilityGoldExclusive,
+            self::VisibilityVerifiedBuyerOnly,
+            self::VisibilityInvitationOnly,
+        ], true);
+    }
+
+    public function tierLabel(): string
+    {
+        return match ($this->marketplace_tier) {
+            self::TierSilver => 'Silver',
+            self::TierGold => 'Gold',
+            self::TierGoldEnterprise => 'Gold Enterprise',
+            default => 'Regular',
+        };
+    }
+
+    public function visibilityLabel(): string
+    {
+        return match ($this->visibility_level) {
+            self::VisibilityPublicPreview => 'Public Preview',
+            self::VisibilitySilverExclusive => 'Silver Exclusive',
+            self::VisibilityGoldExclusive => 'Gold Exclusive',
+            self::VisibilityVerifiedBuyerOnly => 'Verified Buyer Only',
+            self::VisibilityInvitationOnly => 'Invitation Only',
+            default => 'Public',
+        };
+    }
+
+    public function maskedRegistrationNumber(): ?string
+    {
+        if (blank($this->registration_number)) {
+            return null;
+        }
+
+        $value = (string) $this->registration_number;
+        $visible = min(4, strlen($value));
+
+        return str_repeat('*', max(0, strlen($value) - $visible)).substr($value, -$visible);
     }
 
     public function isExpired(): bool
@@ -217,11 +306,52 @@ class Listing extends Model
         return $query->where('status', self::StatusApproved);
     }
 
+    /**
+     * Restricts a listing query to what the given viewer is allowed to
+     * see in a search/browse feed. Invitation-only listings are never
+     * included here even for approved requesters — they are reached by
+     * direct link, never through search, per PrimeUnits privacy rules.
+     */
+    public function scopeVisibleTo(Builder $query, ?User $viewer): Builder
+    {
+        $access = $viewer?->membershipAccess;
+
+        return $query->where(function (Builder $query) use ($access): void {
+            $query->whereIn('visibility_level', [self::VisibilityPublic, self::VisibilityPublicPreview]);
+
+            if ($access?->hasBuyerAccessAtLeast('silver') === true) {
+                $query->orWhere('visibility_level', self::VisibilitySilverExclusive);
+            }
+
+            if ($access?->hasBuyerAccessAtLeast('gold') === true) {
+                $query->orWhere('visibility_level', self::VisibilityGoldExclusive);
+            }
+
+            if ($access?->hasBuyerAccessAtLeast('regular') === true) {
+                $query->orWhere('visibility_level', self::VisibilityVerifiedBuyerOnly);
+            }
+        });
+    }
+
     public function scopeNotExpired(Builder $query): Builder
     {
         return $query->where(function (Builder $q): void {
             $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
         });
+    }
+
+    public function scopeCurrentlyBoosted(Builder $query): Builder
+    {
+        return $query->whereHas('boosts', fn (Builder $q) => $q
+            ->where('is_active', true)
+            ->where('ends_at', '>', now()));
+    }
+
+    public function scopeCurrentlySponsored(Builder $query): Builder
+    {
+        return $query
+            ->where('promotional_type', self::PromoSponsored)
+            ->where(fn (Builder $q) => $q->whereNull('promoted_until')->orWhere('promoted_until', '>', now()));
     }
 
     /**
@@ -339,9 +469,13 @@ class Listing extends Model
         return [
             'approved_at' => 'datetime',
             'expires_at' => 'datetime',
+            'promoted_until' => 'datetime',
             'negotiable' => 'boolean',
             'price' => 'decimal:2',
             'views_count' => 'integer',
+            'is_gold_candidate' => 'boolean',
+            'confidentiality_required' => 'boolean',
+            'price_on_request' => 'boolean',
             'agent_validated_at' => 'datetime',
             'manager_accepted_at' => 'datetime',
         ];

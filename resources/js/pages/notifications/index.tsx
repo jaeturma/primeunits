@@ -34,7 +34,7 @@ export default function NotificationsIndex({
     return (
         <>
             <Head title="Notifications" />
-            <div className="grid gap-6 p-4 lg:grid-cols-[1fr_320px]">
+            <div className="grid grid-cols-1 gap-6 p-4 lg:grid-cols-[1fr_320px]">
                 <section className="grid gap-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>

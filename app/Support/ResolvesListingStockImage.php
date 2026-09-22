@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\LandingAd;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,55 @@ trait ResolvesListingStockImage
         }
 
         return $this->stockListingImageUrl($listing);
+    }
+
+    /**
+     * The shared listing-card payload for the landing feed: used both for
+     * the first server-rendered batch and every "Load 12 More" batch, so
+     * the two can never drift out of sync on what a card shows.
+     *
+     * @return array<string, mixed>
+     */
+    private function serializeFeedListingCard(Listing $listing): array
+    {
+        $primaryImage = $listing->images->firstWhere('is_primary', true) ?? $listing->images->first();
+
+        return [
+            'id' => $listing->id,
+            'title' => $listing->title,
+            'description' => $listing->description,
+            'price' => $listing->price,
+            'condition' => $listing->condition,
+            'brand' => $listing->brand,
+            'model' => $listing->model,
+            'year_model' => $listing->year_model,
+            'province' => $listing->province,
+            'municipality' => $listing->municipality,
+            'category' => [
+                'name' => $listing->category->name,
+                'slug' => $listing->category->slug,
+            ],
+            'image_url' => $this->listingImageUrl($primaryImage, $listing),
+            'marketplace_tier' => $listing->marketplace_tier,
+            'tier_label' => $listing->tierLabel(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeFeedAd(LandingAd $ad): array
+    {
+        return [
+            'id' => $ad->id,
+            'title' => $ad->title,
+            'category' => $ad->category,
+            'body' => $ad->body,
+            'cta_label' => $ad->cta_label,
+            'cta_url' => $ad->cta_url,
+            'image_url' => $ad->image_url,
+            'accent_color' => $ad->accent_color,
+        ];
     }
 
     private function stockListingImageUrl(Listing $listing): string

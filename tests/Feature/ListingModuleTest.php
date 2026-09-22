@@ -7,8 +7,8 @@ use App\Models\SellerProfile;
 use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\RbacSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,7 +44,7 @@ function verifiedSeller(): User
 test('category seeder creates dynamic spec fields', function () {
     $vehicle = Category::query()->where('slug', 'cars')->firstOrFail();
 
-    expect(Category::query()->count())->toBe(7)
+    expect(Category::query()->count())->toBe(9)
         ->and($vehicle->specFields()->where('name', 'transmission')->exists())->toBeTrue();
 });
 

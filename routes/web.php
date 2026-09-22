@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Adm\AnalyticsController;
 use App\Http\Controllers\Adm\BrandController as AdminBrandController;
+use App\Http\Controllers\Adm\CategoryAccessRuleController as AdminCategoryAccessRuleController;
 use App\Http\Controllers\Adm\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Adm\DealerProfileController as AdminDealerProfileController;
 use App\Http\Controllers\Adm\DroneCredentialController as AdminDroneCredentialController;
@@ -10,7 +11,9 @@ use App\Http\Controllers\Adm\FinancingPartnerController as AdminFinancingPartner
 use App\Http\Controllers\Adm\LandingAdController as AdminLandingAdController;
 use App\Http\Controllers\Adm\LandingPageController as AdminLandingPageController;
 use App\Http\Controllers\Adm\ListingController as AdminListingController;
+use App\Http\Controllers\Adm\ListingTierController as AdminListingTierController;
 use App\Http\Controllers\Adm\LocationController as AdminLocationController;
+use App\Http\Controllers\Adm\MembershipApplicationController as AdminMembershipApplicationController;
 use App\Http\Controllers\Adm\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Adm\PlanController as AdminPlanController;
 use App\Http\Controllers\Adm\RentalController as AdminRentalController;
@@ -26,12 +29,16 @@ use App\Http\Controllers\FinancingController;
 use App\Http\Controllers\FinancingPartnerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsuranceController;
+use App\Http\Controllers\LandingFeedController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\ListingAccessRequestController;
 use App\Http\Controllers\ListingBoostController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\MembershipApplicationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PromotionImpressionController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\RentalProfileController;
 use App\Http\Controllers\SellerAnalyticsController;
@@ -43,6 +50,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('insurance', InsuranceController::class)->name('insurance');
+
+// Landing-page listing feed ("Load 12 More"): batched, tier-aware, with
+// Featured/Sponsored/Advertisement placements. Public — guests browse too.
+Route::get('feed/listings', [LandingFeedController::class, 'more'])->name('feed.listings');
+Route::get('feed/ads/{landingAd}/click', [LandingFeedController::class, 'click'])->name('feed.ads.click');
+Route::post('feed/impressions', [PromotionImpressionController::class, 'store'])->name('feed.impressions');
 
 Route::get('listings', [ListingController::class, 'index'])->name('listings.index');
 Route::get('listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
@@ -131,6 +144,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [DronePilotCredentialController::class, 'show'])->name('show');
         Route::post('/', [DronePilotCredentialController::class, 'store'])->name('store');
         Route::get('{credential}/documents/{type}', [DronePilotCredentialController::class, 'document'])->name('documents');
+    });
+
+    // Seller/store authorization applications (any auth user). Silver/Gold
+    // buyer access is not requested here — see settings/membership, which
+    // only lets a user accept or decline an admin-sent invitation.
+    Route::prefix('membership')->name('membership.')->group(function (): void {
+        Route::get('applications', [MembershipApplicationController::class, 'index'])->name('applications.index');
+        Route::post('applications', [MembershipApplicationController::class, 'store'])->name('applications.store');
+        Route::post('applications/{membershipApplication}/withdraw', [MembershipApplicationController::class, 'withdraw'])->name('applications.withdraw');
+        Route::post('applications/{membershipApplication}/accept', [MembershipApplicationController::class, 'accept'])->name('applications.accept');
+        Route::post('applications/{membershipApplication}/decline', [MembershipApplicationController::class, 'decline'])->name('applications.decline');
+        Route::get('applications/documents/{document}', [MembershipApplicationController::class, 'document'])->name('applications.documents');
+    });
+
+    // Restricted-listing access requests (any auth user; sellers/reviewers see their own queue)
+    Route::prefix('listing-access')->name('listing-access.')->group(function (): void {
+        Route::post('{listing}/request', [ListingAccessRequestController::class, 'store'])->name('request');
+        Route::get('mine', [ListingAccessRequestController::class, 'myRequests'])->name('mine');
+        Route::get('review', [ListingAccessRequestController::class, 'review'])->name('review');
+        Route::post('{listingAccessRequest}/approve', [ListingAccessRequestController::class, 'approve'])->name('approve');
+        Route::post('{listingAccessRequest}/reject', [ListingAccessRequestController::class, 'reject'])->name('reject');
+        Route::post('{listingAccessRequest}/revoke', [ListingAccessRequestController::class, 'revoke'])->name('revoke');
     });
 
     Route::middleware('role:dealer')
@@ -339,6 +374,39 @@ Route::middleware(['auth', 'verified', 'role:superadmin,admin,manager,coordinato
         Route::post('drone-credentials/{droneCredential}/suspend', [AdminDroneCredentialController::class, 'suspend'])
             ->middleware('permission:review_drone_credentials')
             ->name('drone-credentials.suspend');
+        Route::get('membership-applications', [AdminMembershipApplicationController::class, 'index'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.index');
+        Route::post('membership-applications/{membershipApplication}/approve', [AdminMembershipApplicationController::class, 'approve'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.approve');
+        Route::post('membership-applications/{membershipApplication}/request-info', [AdminMembershipApplicationController::class, 'requestInfo'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.request-info');
+        Route::post('membership-applications/{membershipApplication}/reject', [AdminMembershipApplicationController::class, 'reject'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.reject');
+        Route::post('membership-applications/{membershipApplication}/suspend', [AdminMembershipApplicationController::class, 'suspend'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.suspend');
+        Route::post('membership-applications/invite', [AdminMembershipApplicationController::class, 'invite'])
+            ->middleware('permission:review_membership_applications')
+            ->name('membership-applications.invite');
+        Route::get('category-access-rules', [AdminCategoryAccessRuleController::class, 'index'])
+            ->middleware('permission:manage_category_tier_rules')
+            ->name('category-access-rules.index');
+        Route::put('category-access-rules/{category}', [AdminCategoryAccessRuleController::class, 'update'])
+            ->middleware('permission:manage_category_tier_rules')
+            ->name('category-access-rules.update');
+        Route::get('listing-tiers', [AdminListingTierController::class, 'index'])
+            ->middleware('permission:review_premium_listings')
+            ->name('listing-tiers.index');
+        Route::put('listing-tiers/{listing}', [AdminListingTierController::class, 'update'])
+            ->middleware('permission:review_premium_listings')
+            ->name('listing-tiers.update');
+        Route::post('listing-tiers/{listing}/approve-gold', [AdminListingTierController::class, 'approveGoldCandidate'])
+            ->middleware('permission:review_gold_listings')
+            ->name('listing-tiers.approve-gold');
     });
 
 require __DIR__.'/settings.php';

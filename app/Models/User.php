@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -92,6 +92,38 @@ class User extends Authenticatable
     public function dealerProfile(): HasOne
     {
         return $this->hasOne(DealerProfile::class);
+    }
+
+    /**
+     * @return HasOne<MembershipAccess, $this>
+     */
+    public function membershipAccess(): HasOne
+    {
+        return $this->hasOne(MembershipAccess::class);
+    }
+
+    /**
+     * @return HasMany<MembershipApplication, $this>
+     */
+    public function membershipApplications(): HasMany
+    {
+        return $this->hasMany(MembershipApplication::class);
+    }
+
+    /**
+     * The user's membership access record, lazily created with a safe
+     * "no access" default (none/none/none) the first time it's needed —
+     * mirrors notificationPreferenceOrDefault() below. Never grants
+     * access itself; see MembershipAccessService for the only paths that
+     * raise buyer_access_level/seller_access_level.
+     */
+    public function membershipAccessOrDefault(): MembershipAccess
+    {
+        return $this->membershipAccess()->firstOrCreate([], [
+            'identity_verification_level' => MembershipAccess::IdentityNone,
+            'buyer_access_level' => MembershipAccess::LevelNone,
+            'seller_access_level' => MembershipAccess::LevelNone,
+        ]);
     }
 
     /**

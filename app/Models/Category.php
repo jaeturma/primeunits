@@ -56,6 +56,14 @@ class Category extends Model
     }
 
     /**
+     * @return HasOne<CategoryAccessRule, $this>
+     */
+    public function accessRule(): HasOne
+    {
+        return $this->hasOne(CategoryAccessRule::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
