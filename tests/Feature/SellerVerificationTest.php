@@ -39,7 +39,7 @@ test('only seller role users can access seller application form', function () {
 });
 
 test('seller can submit an application with files', function () {
-    Storage::fake('public');
+    Storage::fake('local');
 
     $user = User::factory()->create();
     assignRole($user, 'seller');
@@ -61,8 +61,14 @@ test('seller can submit an application with files', function () {
         ->and($profile->valid_id_file)->not->toBeNull()
         ->and($profile->permit_file)->not->toBeNull();
 
-    Storage::disk('public')->assertExists($profile->valid_id_file);
-    Storage::disk('public')->assertExists($profile->permit_file);
+    // Government ID and permit are identity/ownership documents — they must
+    // never land on the public disk, matching the private-storage rule
+    // already enforced for membership application and drone credential
+    // documents (see SecureDocumentController).
+    Storage::disk('local')->assertExists($profile->valid_id_file);
+    Storage::disk('local')->assertExists($profile->permit_file);
+    Storage::disk('public')->assertMissing($profile->valid_id_file);
+    Storage::disk('public')->assertMissing($profile->permit_file);
 });
 
 test('rejected seller can edit and resubmit application', function () {

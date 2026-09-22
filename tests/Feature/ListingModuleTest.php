@@ -50,6 +50,7 @@ test('category seeder creates dynamic spec fields', function () {
 
 test('verified sellers can create listings with category specs images and pdf attachments', function () {
     Storage::fake('public');
+    Storage::fake('local');
 
     $seller = verifiedSeller();
     $vehicle = Category::query()->where('slug', 'cars')->with('specFields')->firstOrFail();
@@ -88,7 +89,12 @@ test('verified sellers can create listings with category specs images and pdf at
         ->and($listing->attachments)->toHaveCount(1);
 
     Storage::disk('public')->assertExists($listing->images->first()->path);
-    Storage::disk('public')->assertExists($listing->attachments->first()->path);
+
+    // PDF attachments are supporting documents, not marketing photos — they
+    // must stay on the private disk, served only through the authorized
+    // ResourceAttachment::url() route (see SecureDocumentController).
+    Storage::disk('local')->assertExists($listing->attachments->first()->path);
+    Storage::disk('public')->assertMissing($listing->attachments->first()->path);
 });
 
 test('listing attachments must be pdf files up to five megabytes', function () {

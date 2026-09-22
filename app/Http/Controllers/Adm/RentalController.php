@@ -52,8 +52,8 @@ class RentalController extends Controller
                 'created_at' => $unit->created_at?->toISOString(),
                 'action_label' => app(ApprovalWorkflowService::class)->actionLabel($unit, $request->user()),
                 'documents' => collect([
-                    $unit->valid_id_file ? ['label' => 'Valid ID', 'url' => Storage::disk('public')->url($unit->valid_id_file)] : null,
-                    $unit->or_cr_file ? ['label' => 'OR/CR', 'url' => Storage::disk('public')->url($unit->or_cr_file)] : null,
+                    $unit->valid_id_file ? ['label' => 'Valid ID', 'url' => route('rental-units.documents', [$unit, 'valid_id_file'])] : null,
+                    $unit->or_cr_file ? ['label' => 'OR/CR', 'url' => route('rental-units.documents', [$unit, 'or_cr_file'])] : null,
                     ...$unit->attachments->map(fn ($attachment): array => ['label' => $attachment->name, 'url' => $attachment->url()]),
                 ])->filter()->values(),
             ]);

@@ -30,8 +30,8 @@ class RentalProfileController extends Controller
         $request->user()->rentalProfile()->updateOrCreate([], [
             ...collect($data)->except(['business_registration_file', 'valid_id_file'])->all(),
             'slug' => Str::slug($data['business_name']).'-'.$request->user()->id,
-            'business_registration_file' => $request->file('business_registration_file')->store('rental-profiles/business', 'public'),
-            'valid_id_file' => $request->file('valid_id_file')->store('rental-profiles/identity', 'public'),
+            'business_registration_file' => $request->file('business_registration_file')->store('rental-profiles/business', 'local'),
+            'valid_id_file' => $request->file('valid_id_file')->store('rental-profiles/identity', 'local'),
             'status' => RentalProfile::StatusPending,
         ]);
 
