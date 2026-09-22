@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\DealerProfile;
 use App\Models\MembershipAccess;
 use App\Models\MembershipApplication;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
@@ -17,6 +19,8 @@ use Illuminate\Validation\ValidationException;
  */
 class MembershipAccessService
 {
+    public function __construct(private NotificationService $notifications) {}
+
     public function grantApplication(MembershipApplication $application): void
     {
         if ($application->type === MembershipApplication::TypeStore) {
@@ -100,5 +104,74 @@ class MembershipAccessService
         $access->update(['current_mode' => $requestedMode]);
 
         return $access->fresh();
+    }
+
+    /**
+     * Reflects real Subscription expiry onto MembershipAccess.buyer_access_status,
+     * so a lapsed Silver/Gold membership actually loses premium access instead
+     * of relying only on Subscription::isActive()'s on-the-fly check (which
+     * nothing but this sync ever turns into an access change). Mirrors the
+     * ExpireDronePilotCredentials command's rationale: the stored status
+     * should reflect reality, not just be checkable on demand.
+     *
+     * A subscription past `ends_at` but still inside `grace_ends_at` moves to
+     * Grace Period on the Subscription only — access is retained during
+     * grace. Access is downgraded only once grace has also passed, and only
+     * when buyer_access_level still matches the lapsed plan's tier (an admin
+     * may have already changed it independently).
+     *
+     * @return array{grace: int, expired: int}
+     */
+    public function syncExpiredMemberships(): array
+    {
+        $counts = ['grace' => 0, 'expired' => 0];
+
+        Subscription::query()
+            ->whereIn('status', [Subscription::StatusActive, Subscription::StatusGracePeriod])
+            ->whereNotNull('ends_at')
+            ->where('ends_at', '<=', now())
+            ->whereHas('plan', fn ($query) => $query->where('type', Plan::TypeMembership)->where('tier', '!=', Plan::TierRegular))
+            ->with(['user.membershipAccess', 'plan'])
+            ->chunkById(100, function ($subscriptions) use (&$counts): void {
+                foreach ($subscriptions as $subscription) {
+                    // Check the grace window by date, not Subscription::isInGracePeriod():
+                    // that method also returns true purely because status is
+                    // already "grace_period", which would keep a subscription
+                    // stuck there forever once grace_ends_at itself has passed.
+                    $stillInGraceWindow = $subscription->grace_ends_at !== null && $subscription->grace_ends_at->isFuture();
+
+                    if ($stillInGraceWindow) {
+                        if ($subscription->status !== Subscription::StatusGracePeriod) {
+                            $subscription->update(['status' => Subscription::StatusGracePeriod]);
+                            $counts['grace']++;
+                        }
+
+                        continue;
+                    }
+
+                    $subscription->update(['status' => Subscription::StatusExpired]);
+
+                    $access = $subscription->user?->membershipAccess;
+
+                    if ($access !== null
+                        && $access->buyer_access_level === $subscription->plan->tier
+                        && $access->buyer_access_status === MembershipAccess::StatusActive
+                    ) {
+                        $access->update(['buyer_access_status' => MembershipAccess::StatusExpired]);
+
+                        $this->notifications->send(
+                            user: $subscription->user,
+                            event: 'membership.expired',
+                            title: 'Membership expired',
+                            message: "Your PrimeUnits {$subscription->plan->name} membership has expired. Renew to keep access to premium listings.",
+                            url: '/settings/membership',
+                        );
+                    }
+
+                    $counts['expired']++;
+                }
+            });
+
+        return $counts;
     }
 }
