@@ -285,8 +285,8 @@ class RentalController extends Controller
                 'drone_pilot_user_id' => $request->integer('drone_pilot_user_id') ?: null,
                 'user_id' => $request->user()->id,
                 'status' => RentalUnit::StatusPending,
-                'valid_id_file' => $request->hasFile('valid_id_file') ? $request->file('valid_id_file')->store('rentals/identity', 'public') : null,
-                'or_cr_file' => $request->hasFile('or_cr_file') ? $request->file('or_cr_file')->store('rentals/identity', 'public') : null,
+                'valid_id_file' => $request->hasFile('valid_id_file') ? $request->file('valid_id_file')->store('rentals/identity', 'local') : null,
+                'or_cr_file' => $request->hasFile('or_cr_file') ? $request->file('or_cr_file')->store('rentals/identity', 'local') : null,
             ]);
 
             if ($unit->isDroneRelated()) {

@@ -76,7 +76,7 @@ class StoreSellerProfileRequest extends FormRequest
 
         foreach ($this->fileDirectories() as $field => $directory) {
             if ($this->hasFile($field)) {
-                $paths[$field] = $this->file($field)->store($directory, 'public');
+                $paths[$field] = $this->file($field)->store($directory, 'local');
             }
         }
 

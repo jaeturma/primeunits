@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Adm;
 
 use App\Http\Controllers\Controller;
 use App\Models\DealerProfile;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,7 +40,7 @@ class DealerProfileController extends Controller
                     default => null,
                 },
                 'documents' => collect([
-                    $d->accreditation_file ? ['label' => 'Accreditation', 'url' => \Illuminate\Support\Facades\Storage::disk('public')->url($d->accreditation_file)] : null,
+                    $d->accreditation_file ? ['label' => 'Accreditation', 'url' => route('dealers.documents', [$d, 'accreditation_file'])] : null,
                     ...$d->attachments->map(fn ($attachment): array => ['label' => $attachment->name, 'url' => $attachment->url()]),
                 ])->filter()->values(),
             ]);
@@ -70,7 +71,7 @@ class DealerProfileController extends Controller
 
         if (! $dealerProfile->user->hasRole('dealer')) {
             $dealerProfile->user->roles()->attach(
-                \App\Models\Role::query()->where('name', 'dealer')->first()?->id
+                Role::query()->where('name', 'dealer')->first()?->id
             );
         }
 

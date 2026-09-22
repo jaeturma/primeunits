@@ -23,7 +23,7 @@ trait StoresResourceAttachments
             $resource->attachments()->create([
                 'user_id' => $request->user()?->id,
                 'name' => $file->getClientOriginalName(),
-                'path' => $file->store($directory, 'public'),
+                'path' => $file->store($directory, 'local'),
                 'mime_type' => $file->getMimeType() ?? 'application/pdf',
                 'size' => $file->getSize(),
             ]);

@@ -7,7 +7,6 @@ use App\Models\SellerProfile;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -120,17 +119,17 @@ class SellerProfileController extends Controller
             'verified_at' => $profile->verified_at?->toISOString(),
             'rejected_reason' => $profile->rejected_reason,
             'files' => [
-                'valid_id_file' => $this->fileUrl($profile->valid_id_file),
-                'selfie_file' => $this->fileUrl($profile->selfie_file),
-                'permit_file' => $this->fileUrl($profile->permit_file),
-                'accreditation_file' => $this->fileUrl($profile->accreditation_file),
-                'representative_id_file' => $this->fileUrl($profile->representative_id_file),
+                'valid_id_file' => $this->fileUrl($profile, 'valid_id_file'),
+                'selfie_file' => $this->fileUrl($profile, 'selfie_file'),
+                'permit_file' => $this->fileUrl($profile, 'permit_file'),
+                'accreditation_file' => $this->fileUrl($profile, 'accreditation_file'),
+                'representative_id_file' => $this->fileUrl($profile, 'representative_id_file'),
             ],
         ];
     }
 
-    private function fileUrl(?string $path): ?string
+    private function fileUrl(SellerProfile $profile, string $field): ?string
     {
-        return $path ? Storage::disk('public')->url($path) : null;
+        return $profile->{$field} ? route('sellers.documents', [$profile, $field]) : null;
     }
 }

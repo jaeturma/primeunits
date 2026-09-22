@@ -9,7 +9,6 @@ use App\Services\NotificationService;
 use App\Support\ResolvesListingStockImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -126,8 +125,8 @@ class ListingController extends Controller
             ],
             'image_url' => $this->listingImageUrl($primaryImage, $listing),
             'documents' => collect([
-                $listing->valid_id_file ? ['label' => 'Valid ID', 'url' => Storage::disk('public')->url($listing->valid_id_file)] : null,
-                $listing->or_cr_file ? ['label' => 'OR/CR', 'url' => Storage::disk('public')->url($listing->or_cr_file)] : null,
+                $listing->valid_id_file ? ['label' => 'Valid ID', 'url' => route('listings.documents', [$listing, 'valid_id_file'])] : null,
+                $listing->or_cr_file ? ['label' => 'OR/CR', 'url' => route('listings.documents', [$listing, 'or_cr_file'])] : null,
                 ...$listing->attachments->map(fn ($attachment): array => ['label' => $attachment->name, 'url' => $attachment->url()]),
             ])->filter()->values(),
             'can_approve' => app(ApprovalWorkflowService::class)->actionLabel($listing, request()->user()) !== null,

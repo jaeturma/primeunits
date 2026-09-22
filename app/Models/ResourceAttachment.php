@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'user_id',
@@ -33,8 +32,12 @@ class ResourceAttachment extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * The authorized download route for this attachment, never a raw
+     * public-disk URL — see SecureDocumentController::attachment().
+     */
     public function url(): string
     {
-        return Storage::disk('public')->url($this->path);
+        return route('attachments.show', $this);
     }
 }

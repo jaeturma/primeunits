@@ -159,7 +159,7 @@ class DealerProfileController extends Controller
             $data['banner'] = $request->file('banner')->store('dealers/banners', 'public');
         }
         if ($request->hasFile('accreditation_file')) {
-            $data['accreditation_file'] = $request->file('accreditation_file')->store('dealers/docs', 'public');
+            $data['accreditation_file'] = $request->file('accreditation_file')->store('dealers/docs', 'local');
         }
 
         $profile = $request->user()->dealerProfile()->create($data);

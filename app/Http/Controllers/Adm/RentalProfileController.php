@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\RentalProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,8 +19,8 @@ class RentalProfileController extends Controller
                 'business_name' => $profile->business_name,
                 'status' => $profile->status,
                 'user' => $profile->user,
-                'business_registration_url' => Storage::disk('public')->url($profile->business_registration_file),
-                'valid_id_url' => Storage::disk('public')->url($profile->valid_id_file),
+                'business_registration_url' => $profile->business_registration_file ? route('rental-profiles.documents', [$profile, 'business_registration_file']) : null,
+                'valid_id_url' => $profile->valid_id_file ? route('rental-profiles.documents', [$profile, 'valid_id_file']) : null,
             ]),
         ]);
     }

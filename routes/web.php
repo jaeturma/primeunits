@@ -42,6 +42,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PromotionImpressionController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\RentalProfileController;
+use App\Http\Controllers\SecureDocumentController;
 use App\Http\Controllers\SellerAnalyticsController;
 use App\Http\Controllers\SellerProfileController;
 use App\Http\Controllers\SeoController;
@@ -146,6 +147,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [DronePilotCredentialController::class, 'store'])->name('store');
         Route::get('{credential}/documents/{type}', [DronePilotCredentialController::class, 'document'])->name('documents');
     });
+
+    // Private identity/ownership/registration document access (owner or
+    // the admin permission for that review workflow — see
+    // SecureDocumentController). Never a public-disk URL.
+    Route::get('sellers/{sellerProfile}/documents/{field}', [SecureDocumentController::class, 'sellerProfile'])->name('sellers.documents');
+    Route::get('dealers/{dealerProfile}/documents/{field}', [SecureDocumentController::class, 'dealerProfile'])->name('dealers.documents');
+    Route::get('listings/{listing}/documents/{field}', [SecureDocumentController::class, 'listing'])->name('listings.documents');
+    Route::get('rental-profiles/{rentalProfile}/documents/{field}', [SecureDocumentController::class, 'rentalProfile'])->name('rental-profiles.documents');
+    Route::get('rental-units/{rentalUnit}/documents/{field}', [SecureDocumentController::class, 'rentalUnit'])->name('rental-units.documents');
+    Route::get('attachments/{resourceAttachment}', [SecureDocumentController::class, 'attachment'])->name('attachments.show');
 
     // Seller/store authorization applications (any auth user). Silver/Gold
     // buyer access is not requested here — see settings/membership, which

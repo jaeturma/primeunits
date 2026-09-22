@@ -139,7 +139,7 @@ class StoreListingRequest extends FormRequest
             ->mapWithKeys(function (string $field): array {
                 $file = $this->file($field);
 
-                return $file instanceof UploadedFile ? [$field => $file->store('listings/identity', 'public')] : [];
+                return $file instanceof UploadedFile ? [$field => $file->store('listings/identity', 'local')] : [];
             })->all();
     }
 
