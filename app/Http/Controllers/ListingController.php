@@ -490,6 +490,7 @@ class ListingController extends Controller
             'visibility_level' => $listing->visibility_level,
             'visibility_label' => $listing->visibilityLabel(),
             'seller_capacity' => $listing->seller_capacity,
+            'seller_capacity_label' => $listing->sellerCapacityLabel(),
         ];
     }
 

@@ -73,6 +73,8 @@ class ListingVisibilityService
             'region' => $listing->region,
             'tier' => $listing->marketplace_tier,
             'tier_label' => $listing->tierLabel(),
+            'seller_capacity' => $listing->seller_capacity,
+            'seller_capacity_label' => $listing->sellerCapacityLabel(),
         ];
     }
 
